@@ -1,0 +1,154 @@
+@import '@unocss/reset/tailwind.css';
+
+:root {
+  /* Light Theme Colors */
+  --color-primary: 66 133 244; /* #4285f4 */
+  --color-primary-hover: 51 103 214; /* #3367d6 */
+  --color-secondary: 52 168 83; /* #34a853 */
+  --color-secondary-hover: 46 142 72; /* #2e8e48 */
+  --color-danger: 234 67 53; /* #ea4335 */
+  --color-danger-hover: 211 47 47; /* #d32f2f */
+  --color-warning: 251 188 4; /* #fbbc04 */
+  
+  --color-surface: 255 255 255; /* white */
+  --color-surface-secondary: 248 249 250; /* #f8f9fa */
+  --color-border: 218 220 224; /* #dadce0 */
+  --color-border-light: 232 234 237; /* #e8eaed */
+  
+  --color-text: 32 33 36; /* #202124 */
+  --color-text-secondary: 95 99 104; /* #5f6368 */
+  --color-text-inverse: 255 255 255; /* white */
+  
+  /* Tab group colors */
+  --color-group-blue: 66 133 244;
+  --color-group-red: 234 67 53;
+  --color-group-yellow: 251 188 4;
+  --color-group-green: 52 168 83;
+  --color-group-pink: 255 109 145;
+  --color-group-purple: 175 92 247;
+  --color-group-cyan: 0 188 212;
+  --color-group-grey: 158 158 158;
+  --color-group-orange: 255 152 0;
+}
+
+[data-theme="dark"], 
+:root.dark {
+  /* Dark Theme Colors */
+  --color-primary: 138 180 248; /* #8ab4f8 */
+  --color-primary-hover: 66 133 244; /* #4285f4 */
+  --color-secondary: 129 201 149; /* #81c995 */
+  --color-secondary-hover: 52 168 83; /* #34a853 */
+  --color-danger: 242 139 130; /* #f28b82 */
+  --color-danger-hover: 234 67 53; /* #ea4335 */
+  --color-warning: 253 214 99; /* #fdd663 */
+  
+  --color-surface: 32 33 36; /* #202124 */
+  --color-surface-secondary: 41 42 45; /* #292a2d */
+  --color-border: 95 99 104; /* #5f6368 */
+  --color-border-light: 60 64 67; /* #3c4043 */
+  
+  --color-text: 232 234 237; /* #e8eaed */
+  --color-text-secondary: 154 160 166; /* #9aa0a6 */
+  --color-text-inverse: 32 33 36; /* #202124 */
+  
+  /* Adjusted tab group colors for dark theme */
+  --color-group-blue: 138 180 248;
+  --color-group-red: 242 139 130;
+  --color-group-yellow: 253 214 99;
+  --color-group-green: 129 201 149;
+  --color-group-pink: 244 143 177;
+  --color-group-purple: 206 147 216;
+  --color-group-cyan: 77 208 225;
+  --color-group-grey: 189 189 189;
+  --color-group-orange: 255 183 77;
+}
+
+/* System preference detection */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    /* Dark Theme Colors */
+    --color-primary: 138 180 248;
+    --color-primary-hover: 66 133 244;
+    --color-secondary: 129 201 149;
+    --color-secondary-hover: 52 168 83;
+    --color-danger: 242 139 130;
+    --color-danger-hover: 234 67 53;
+    --color-warning: 253 214 99;
+    
+    --color-surface: 32 33 36;
+    --color-surface-secondary: 41 42 45;
+    --color-border: 95 99 104;
+    --color-border-light: 60 64 67;
+    
+    --color-text: 232 234 237;
+    --color-text-secondary: 154 160 166;
+    --color-text-inverse: 32 33 36;
+    
+    --color-group-blue: 138 180 248;
+    --color-group-red: 242 139 130;
+    --color-group-yellow: 253 214 99;
+    --color-group-green: 129 201 149;
+    --color-group-pink: 244 143 177;
+    --color-group-purple: 206 147 216;
+    --color-group-cyan: 77 208 225;
+    --color-group-grey: 189 189 189;
+    --color-group-orange: 255 183 77;
+  }
+}
+
+/* UnoCSS layer */
+@unocss all;
+
+/* Custom animations */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--color-border));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--color-text-secondary));
+}
+
+/* Base styles */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}

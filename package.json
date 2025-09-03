@@ -1,0 +1,39 @@
+{
+  "name": "tab-sorting",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "type-check-strict": "tsc --noEmit",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "build:xpi": "web-ext build --source-dir dist --artifacts-dir ./",
+    "build:firefox": "npm run build && npm run build:xpi"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@iconify-json/mdi": "^1.2.3",
+    "@types/node": "^24.3.0",
+    "@types/webextension-polyfill": "^0.12.3",
+    "@unocss/preset-attributify": "^66.5.0",
+    "@unocss/preset-icons": "^66.5.0",
+    "@unocss/preset-uno": "^66.5.0",
+    "@unocss/reset": "^66.5.0",
+    "@unocss/vite": "^66.5.0",
+    "typescript": "^5.9.2",
+    "unocss": "^66.5.0",
+    "vite": "^7.1.4",
+    "web-ext": "^8.9.0"
+  },
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "^1.0.14",
+    "ai": "^5.0.30",
+    "webextension-polyfill": "^0.12.0",
+    "zod": "^4.1.5"
+  }
+}

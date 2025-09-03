@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Tab Sorter</title>
+</head>
+<body class="popup-container">
+  <header class="header-primary">
+    <h1 class="header-title flex items-center gap-2">
+      <i class="i-mdi-robot"></i>
+      AI Tab Sorter
+    </h1>
+    <div class="flex items-center gap-3">
+      <button id="themeToggle" class="p-2 rounded-full text-text-inverse/70 hover:text-text-inverse transition-colors" title="テーマ切り替え">
+        <i id="themeIcon" class="i-mdi-brightness-6 text-xl"></i>
+      </button>
+      <label class="toggle-container">
+        <input type="checkbox" id="enableToggle" class="toggle-input" checked>
+        <span class="toggle-slider">
+          <span class="toggle-slider-thumb" data-checked="translate-x-6"></span>
+        </span>
+      </label>
+    </div>
+  </header>
+
+  <main class="flex-1 p-4 overflow-y-auto">
+    <section class="section">
+      <h2 class="text-sm font-semibold text-text uppercase tracking-wider mb-3">ステータス</h2>
+      <div class="bg-surface-secondary rounded-lg p-3">
+        <div class="status-item">
+          <span class="status-label">拡張機能:</span>
+          <span id="extensionStatus" class="status-value status-active">有効</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">API接続:</span>
+          <div class="flex items-center gap-2">
+            <span id="apiStatus" class="status-value status-checking">未確認</span>
+            <button id="checkApiStatus" class="btn-icon" title="接続をチェック">
+              <i class="i-mdi-refresh text-sm"></i>
+            </button>
+          </div>
+        </div>
+        <div class="status-item pl-5">
+          <span class="text-xs italic text-text-secondary">最終確認:</span>
+          <span id="lastApiCheckTime" class="text-xs">なし</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">処理済みタブ:</span>
+          <span id="processedCount" class="status-value">0</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="text-sm font-semibold text-text uppercase tracking-wider mb-3">タブグループ</h2>
+      <div id="groupsList" class="max-h-200px overflow-y-auto">
+        <!-- Groups will be dynamically inserted here -->
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="text-sm font-semibold text-text uppercase tracking-wider mb-3">アクション</h2>
+      <div class="flex flex-col gap-2">
+        <button id="classifyCurrentTab" class="btn-primary">
+          現在のタブを分類
+        </button>
+        <button id="classifyAllTabs" class="btn-secondary">
+          すべてのタブを分類
+        </button>
+        <button id="ungroupAllTabs" class="btn-danger">
+          グループ解除
+        </button>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="text-sm font-semibold text-text uppercase tracking-wider mb-3">クイック設定</h2>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <label for="autoGroup" class="flex-1 text-text">
+            新規タブを自動グループ化
+          </label>
+          <input type="checkbox" id="autoGroup" class="w-4.5 h-4.5 cursor-pointer accent-primary" checked>
+        </div>
+        <div class="flex justify-between items-center">
+          <label for="groupingDelay" class="flex-1 text-text">
+            グループ化の遅延 (秒)
+          </label>
+          <input type="number" id="groupingDelay" 
+                 class="w-15 px-2 py-1 border border-border rounded text-center text-sm bg-surface focus:outline-none focus:border-primary transition-colors"
+                 min="0" max="10" value="2" step="0.5">
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="flex justify-between items-center px-4 py-3 border-t border-border bg-surface-secondary">
+    <button id="openSettings" class="btn-link flex items-center gap-1">
+      <i class="i-mdi-cog"></i>
+      詳細設定
+    </button>
+    <div class="flex flex-col items-end gap-0.5">
+      <span class="text-xs text-text-secondary" id="version">-</span>
+      <span class="text-xs text-text-secondary" id="buildTime">-</span>
+    </div>
+  </footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

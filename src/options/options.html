@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Tab Sorter - 設定</title>
+</head>
+<body class="min-h-screen bg-surface-secondary">
+  <div class="options-container">
+    <header class="flex justify-between items-center mb-8">
+      <h1 class="text-2xl font-bold flex items-center gap-2 text-text">
+        <i class="i-mdi-robot"></i>
+        AI Tab Sorter 設定
+      </h1>
+      <div class="flex items-center gap-2">
+        <button id="themeToggle" class="p-2 rounded-full bg-surface border border-border hover:border-primary transition-colors" title="テーマ切り替え">
+          <i id="themeIcon" class="i-mdi-brightness-6 text-xl"></i>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="section-card mb-5">
+        <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-text">
+          <i class="i-mdi-api text-primary"></i>
+          AI API設定
+        </h2>
+        <div class="form-group">
+          <label for="apiUrl" class="form-label">APIエンドポイント</label>
+          <input type="text" id="apiUrl" class="form-input" placeholder="http://localhost:11434/v1">
+        </div>
+        <div class="form-group">
+          <label for="apiKey" class="form-label">APIキー (オプション)</label>
+          <div class="relative">
+            <input type="password" id="apiKey" class="form-input pr-10" placeholder="ローカルLLMの場合は不要">
+            <button id="toggleApiKey" class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-secondary hover:text-text transition-colors">
+              <i class="i-mdi-eye text-xl" id="apiKeyIcon"></i>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="model" class="form-label">モデル名</label>
+          <input type="text" id="model" class="form-input" placeholder="llama3">
+        </div>
+        <div class="form-group">
+          <label for="maxTokens" class="form-label flex justify-between">
+            <span>Max Tokens</span>
+            <span class="text-primary font-semibold" id="maxTokensValue">1024</span>
+          </label>
+          <input type="range" id="maxTokens" 
+                 class="w-full h-1.5 bg-border rounded-full appearance-none cursor-pointer 
+                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4.5 
+                        [&::-webkit-slider-thumb]:h-4.5 [&::-webkit-slider-thumb]:rounded-full 
+                        [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer
+                        [&::-moz-range-thumb]:w-4.5 [&::-moz-range-thumb]:h-4.5 
+                        [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary 
+                        [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-none"
+                 min="256" max="8192" step="256" value="1024">
+        </div>
+        <div class="form-group">
+          <label for="temperature" class="form-label flex justify-between">
+            <span>Temperature</span>
+            <span class="text-primary font-semibold" id="temperatureValue">0.3</span>
+          </label>
+          <input type="range" id="temperature" 
+                 class="w-full h-1.5 bg-border rounded-full appearance-none cursor-pointer 
+                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4.5 
+                        [&::-webkit-slider-thumb]:h-4.5 [&::-webkit-slider-thumb]:rounded-full 
+                        [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer
+                        [&::-moz-range-thumb]:w-4.5 [&::-moz-range-thumb]:h-4.5 
+                        [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary 
+                        [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-none"
+                 min="0" max="1" step="0.1" value="0.3">
+        </div>
+        <button id="testConnection" class="btn-primary flex items-center gap-2">
+          <i class="i-mdi-check-circle"></i>
+          接続テスト
+        </button>
+      </section>
+
+      <section class="section-card mb-5">
+        <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-text">
+          <i class="i-mdi-folder-open text-secondary"></i>
+          カテゴリ設定
+        </h2>
+        <div id="categoriesList" class="mb-4"></div>
+        <button id="addCategory" class="btn-secondary flex items-center gap-2">
+          <i class="i-mdi-plus"></i>
+          カテゴリ追加
+        </button>
+      </section>
+
+      <section class="section-card mb-5">
+        <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-text">
+          <i class="i-mdi-alert-circle text-warning"></i>
+          除外URL
+        </h2>
+        <textarea id="excludedUrls" 
+                  class="form-textarea" 
+                  rows="5" 
+                  placeholder="除外するURLパターン（1行に1つ）&#10;例: *.google.com/*&#10;    *.slack.com/*"></textarea>
+      </section>
+
+      <div class="flex gap-3 justify-end">
+        <button id="resetSettings" class="btn-secondary flex items-center gap-2">
+          <i class="i-mdi-refresh"></i>
+          リセット
+        </button>
+        <button id="saveSettings" class="btn-primary flex items-center gap-2">
+          <i class="i-mdi-content-save"></i>
+          保存
+        </button>
+      </div>
+    </main>
+    
+    <footer class="mt-8 pt-5 border-t border-border">
+      <div class="text-center text-xs text-text-secondary flex justify-center gap-2 items-center">
+        <span>バージョン: <span id="version" class="font-mono">-</span></span>
+        <span class="text-border-light">|</span>
+        <span>ビルド日時: <span id="buildTime" class="font-mono">-</span></span>
+      </div>
+    </footer>
+  </div>
+  <script type="module" src="options.js"></script>
+</body>
+</html>
