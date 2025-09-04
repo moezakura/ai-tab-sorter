@@ -52,40 +52,36 @@ class PopupController {
 
   private applyTheme() {
     const root = document.documentElement;
-    const themeIcon = document.getElementById('themeIcon');
+    const lightBtn = document.getElementById('lightThemeBtn');
+    const darkBtn = document.getElementById('darkThemeBtn');
+    const systemBtn = document.getElementById('systemThemeBtn');
     
     // Remove existing theme classes
     root.classList.remove('light', 'dark');
     root.removeAttribute('data-theme');
     
+    // Reset button states
+    lightBtn?.classList.remove('bg-white/30', 'bg-yellow-400/30');
+    darkBtn?.classList.remove('bg-white/30', 'bg-blue-600/30');
+    systemBtn?.classList.remove('bg-white/30', 'opacity-100');
+    systemBtn?.classList.add('opacity-60');
+    
     if (this.currentTheme === 'light') {
       root.setAttribute('data-theme', 'light');
-      if (themeIcon) {
-        themeIcon.className = 'i-mdi-weather-sunny text-xl';
-      }
+      lightBtn?.classList.add('bg-yellow-400/30');
     } else if (this.currentTheme === 'dark') {
       root.setAttribute('data-theme', 'dark');
       root.classList.add('dark');
-      if (themeIcon) {
-        themeIcon.className = 'i-mdi-weather-night text-xl';
-      }
+      darkBtn?.classList.add('bg-blue-600/30');
     } else {
       // System theme - let CSS media query handle it
-      if (themeIcon) {
-        themeIcon.className = 'i-mdi-brightness-6 text-xl';
-      }
+      systemBtn?.classList.remove('opacity-60');
+      systemBtn?.classList.add('bg-white/30', 'opacity-100');
     }
   }
 
-  private async toggleTheme() {
-    // Cycle through themes: system -> light -> dark -> system
-    if (this.currentTheme === 'system') {
-      this.currentTheme = 'light';
-    } else if (this.currentTheme === 'light') {
-      this.currentTheme = 'dark';
-    } else {
-      this.currentTheme = 'system';
-    }
+  private async setTheme(theme: 'light' | 'dark' | 'system') {
+    this.currentTheme = theme;
     
     // Save preference
     await browser.storage.local.set({ theme: this.currentTheme });
@@ -106,14 +102,14 @@ class PopupController {
     if (!this.settings) return;
 
     // Update toggle states
-    const enableToggle = document.getElementById('enableToggle') as HTMLInputElement;
+    const extensionToggle = document.getElementById('extensionToggle') as HTMLInputElement;
     const autoGroupCheckbox = document.getElementById('autoGroup') as HTMLInputElement;
     const groupingDelayInput = document.getElementById('groupingDelay') as HTMLInputElement;
 
-    if (enableToggle) {
-      enableToggle.checked = this.settings.enabled;
+    if (extensionToggle) {
+      extensionToggle.checked = this.settings.enabled;
       // Update toggle slider position
-      const sliderThumb = enableToggle.nextElementSibling?.querySelector('.toggle-slider-thumb') as HTMLElement;
+      const sliderThumb = extensionToggle.nextElementSibling?.querySelector('.toggle-slider-thumb') as HTMLElement;
       if (sliderThumb) {
         if (this.settings.enabled) {
           sliderThumb.classList.add('translate-x-6');
@@ -125,25 +121,61 @@ class PopupController {
     if (autoGroupCheckbox) autoGroupCheckbox.checked = this.settings.autoGroupNewTabs;
     if (groupingDelayInput) groupingDelayInput.value = (this.settings.groupingDelay / 1000).toString();
 
-    // Update status display
-    const statusElement = document.getElementById('extensionStatus');
-    if (statusElement) {
-      statusElement.textContent = this.settings.enabled ? '有効' : '無効';
-      statusElement.className = this.settings.enabled ? 'status-value status-active' : 'status-value status-inactive';
+    // Update status display and toggle button appearance
+    const statusTextElement = document.getElementById('extensionStatusText');
+    const toggleSlider = document.querySelector('#extensionToggle ~ .toggle-slider') as HTMLElement;
+    
+    if (statusTextElement) {
+      statusTextElement.textContent = this.settings.enabled ? '有効' : '無効';
+      if (this.settings.enabled) {
+        statusTextElement.className = 'text-sm px-2 py-0.5 rounded-full font-medium bg-green-500/20 text-green-600 dark:bg-green-500/30 dark:text-green-400';
+      } else {
+        statusTextElement.className = 'text-sm px-2 py-0.5 rounded-full font-medium bg-gray-500/20 text-gray-600 dark:bg-gray-500/30 dark:text-gray-400';
+      }
+    }
+    
+    // Update toggle slider background color based on enabled state
+    if (toggleSlider) {
+      if (this.settings.enabled) {
+        toggleSlider.style.backgroundColor = 'rgb(52, 168, 83)'; // Green color for enabled
+      } else {
+        toggleSlider.style.backgroundColor = 'rgb(158, 158, 158)'; // Gray color for disabled
+      }
     }
   }
 
   private setupEventListeners() {
-    // Theme toggle
-    document.getElementById('themeToggle')?.addEventListener('click', () => {
-      this.toggleTheme();
+    // Theme buttons
+    document.getElementById('lightThemeBtn')?.addEventListener('click', () => {
+      this.setTheme('light');
+    });
+    
+    document.getElementById('darkThemeBtn')?.addEventListener('click', () => {
+      this.setTheme('dark');
+    });
+    
+    document.getElementById('systemThemeBtn')?.addEventListener('click', () => {
+      this.setTheme('system');
     });
 
-    // Enable toggle
-    document.getElementById('enableToggle')?.addEventListener('change', async (e) => {
+    // Extension toggle
+    document.getElementById('extensionToggle')?.addEventListener('change', async (e) => {
       const enabled = (e.target as HTMLInputElement).checked;
       await this.storageManager.updateSetting('enabled', enabled);
+      
+      // Update UI
+      this.settings = await this.storageManager.getSettings();
       this.updateUI();
+      
+      // Update toggle slider color immediately
+      const toggleSlider = document.querySelector('#extensionToggle ~ .toggle-slider') as HTMLElement;
+      if (toggleSlider) {
+        if (enabled) {
+          toggleSlider.style.backgroundColor = 'rgb(52, 168, 83)'; // Green color for enabled
+        } else {
+          toggleSlider.style.backgroundColor = 'rgb(158, 158, 158)'; // Gray color for disabled
+        }
+      }
       
       // Notify background script
       await browser.runtime.sendMessage({
@@ -195,7 +227,9 @@ class PopupController {
     const apiStatus = await this.storageManager.getApiConnectionStatus();
     
     if (apiStatus.lastCheckTime && apiStatus.lastStatus !== undefined) {
-      statusElement.textContent = apiStatus.lastStatus ? '接続済み' : '接続エラー';
+      statusElement.innerHTML = apiStatus.lastStatus 
+        ? '<i class="i-mdi-check-circle"></i> 接続済み' 
+        : '<i class="i-mdi-alert-circle"></i> 接続エラー';
       statusElement.className = apiStatus.lastStatus ? 'status-value status-active' : 'status-value status-error';
       timeElement.textContent = this.formatRelativeTime(apiStatus.lastCheckTime);
     } else {
@@ -227,7 +261,9 @@ class PopupController {
       await this.storageManager.saveApiConnectionStatus(isConnected);
       
       // Update UI
-      statusElement.textContent = isConnected ? '接続済み' : '接続エラー';
+      statusElement.innerHTML = isConnected 
+        ? '<i class="i-mdi-check-circle"></i> 接続済み' 
+        : '<i class="i-mdi-alert-circle"></i> 接続エラー';
       statusElement.className = isConnected ? 'status-value status-active' : 'status-value status-error';
       timeElement.textContent = this.formatRelativeTime(Date.now());
       
@@ -240,8 +276,7 @@ class PopupController {
       // Save the status
       await this.storageManager.saveApiConnectionStatus(false);
       
-      statusElement.textContent = '接続エラー';
-      statusElement.className = 'status-value status-error';
+      statusContainer.innerHTML = '<i class="i-mdi-alert-circle"></i><span class="status-value status-error">接続エラー</span>';
       timeElement.textContent = this.formatRelativeTime(Date.now());
       
       this.showNotification('API接続エラー', 'error');
@@ -249,7 +284,7 @@ class PopupController {
       // Re-enable button
       if (checkButton) {
         checkButton.disabled = false;
-        checkButton.innerHTML = '<i class="i-mdi-refresh text-sm"></i>';
+        checkButton.innerHTML = '<i class="i-mdi-refresh text-lg block"></i>';
       }
     }
   }

@@ -11,33 +11,54 @@
       <i class="i-mdi-robot"></i>
       AI Tab Sorter
     </h1>
-    <div class="flex items-center gap-3">
-      <button id="themeToggle" class="p-2 rounded-full text-text-inverse/70 hover:text-text-inverse transition-colors" title="テーマ切り替え">
-        <i id="themeIcon" class="i-mdi-brightness-6 text-xl"></i>
+    <div class="flex items-center gap-2">
+      <!-- Theme toggle: Light/Dark with system option -->
+      <button id="systemThemeBtn" class="p-1.5 rounded bg-white/20 text-white hover:bg-white/30 transition-all" title="システム設定に従う">
+        <i class="i-mdi-monitor text-lg block"></i>
       </button>
-      <label class="toggle-container">
-        <input type="checkbox" id="enableToggle" class="toggle-input" checked>
-        <span class="toggle-slider">
-          <span class="toggle-slider-thumb" data-checked="translate-x-6"></span>
-        </span>
-      </label>
+      <div class="flex items-center bg-white/20 rounded-full p-0.5">
+        <button id="lightThemeBtn" class="theme-btn p-1.5 rounded-full text-white hover:bg-white/20 transition-all" title="ライトテーマ">
+          <i class="i-mdi-white-balance-sunny text-lg block"></i>
+        </button>
+        <button id="darkThemeBtn" class="theme-btn p-1.5 rounded-full text-white hover:bg-white/20 transition-all" title="ダークテーマ">
+          <i class="i-mdi-weather-night text-lg block"></i>
+        </button>
+      </div>
     </div>
   </header>
 
   <main class="flex-1 p-4 overflow-y-auto">
+    <!-- Extension Control Section -->
+    <section id="extensionControlSection" class="section p-4 mb-4 transition-all duration-300">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <label for="extensionToggle" class="text-base font-medium text-text">
+            拡張機能
+          </label>
+          <span id="extensionStatusText" class="text-sm px-2 py-0.5 rounded-full font-medium">
+            有効
+          </span>
+        </div>
+        <label class="toggle-container">
+          <input type="checkbox" id="extensionToggle" class="toggle-input" checked>
+          <span class="toggle-slider">
+            <span class="toggle-slider-thumb" data-checked="translate-x-6"></span>
+          </span>
+        </label>
+      </div>
+    </section>
+
     <section class="section">
       <h2 class="text-sm font-semibold text-text uppercase tracking-wider mb-3">ステータス</h2>
       <div class="bg-surface-secondary rounded-lg p-3">
         <div class="status-item">
-          <span class="status-label">拡張機能:</span>
-          <span id="extensionStatus" class="status-value status-active">有効</span>
-        </div>
-        <div class="status-item">
           <span class="status-label">API接続:</span>
           <div class="flex items-center gap-2">
-            <span id="apiStatus" class="status-value status-checking">未確認</span>
+            <div id="apiStatus" class="flex items-center gap-1">
+              <span id="apiStatusText" class="status-value status-checking">未確認</span>
+            </div>
             <button id="checkApiStatus" class="btn-icon" title="接続をチェック">
-              <i class="i-mdi-refresh text-sm"></i>
+              <i class="i-mdi-refresh text-lg block"></i>
             </button>
           </div>
         </div>

@@ -78,7 +78,7 @@ export default defineConfig({
     'btn-primary': 'btn bg-primary text-text-inverse hover:bg-primary-hover',
     'btn-secondary': 'btn bg-surface border border-border hover:bg-surface-secondary color-text',
     'btn-danger': 'btn bg-surface text-danger border border-danger hover:bg-danger hover:text-text-inverse',
-    'btn-icon': 'p-1.5 bg-transparent border border-border rounded hover:bg-surface-secondary transition-all color-text',
+    'btn-icon': 'inline-flex items-center justify-center p-2.5 bg-transparent border border-border rounded hover:bg-surface-secondary transition-all color-text',
     'btn-link': 'bg-transparent text-primary cursor-pointer hover:underline',
     
     // Toggle Switch
