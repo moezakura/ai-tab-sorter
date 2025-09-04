@@ -10,6 +10,7 @@ export class TabManager {
   private settings: ExtensionSettings;
   private tabCache: TabCache = {};
   private processingQueue: Set<number> = new Set();
+  private pendingQueue: Set<number> = new Set();
   private storageManager = new StorageManager();
 
   constructor(
@@ -32,7 +33,7 @@ export class TabManager {
     // Wait for tab to load before processing
     setTimeout(() => {
       if (tab.id) {
-        this.classifyTab(tab.id);
+        this.enqueueTab(tab.id);
       }
     }, this.settings.groupingDelay);
   }
@@ -53,12 +54,24 @@ export class TabManager {
       lastClassified: Date.now()
     };
 
-    await this.classifyTab(tab.id);
+    await this.enqueueTab(tab.id);
   }
 
   handleTabRemoval(tabId: number) {
     delete this.tabCache[tabId];
     this.processingQueue.delete(tabId);
+    this.pendingQueue.delete(tabId);
+    this.broadcastStatus();
+  }
+
+  public enqueueTab(tabId: number) {
+    if (this.processingQueue.has(tabId) || this.pendingQueue.has(tabId)) {
+      return;
+    }
+    this.pendingQueue.add(tabId);
+    this.broadcastStatus();
+    // Kick off classification asynchronously
+    this.classifyTab(tabId);
   }
 
   async classifyTab(tabId: number): Promise<void> {
@@ -68,7 +81,13 @@ export class TabManager {
       return;
     }
 
+    // If it was pending, mark as starting
+    if (this.pendingQueue.has(tabId)) {
+      this.pendingQueue.delete(tabId);
+    }
+
     this.processingQueue.add(tabId);
+    this.broadcastStatus();
 
     try {
       const tab = await browser.tabs.get(tabId);
@@ -115,6 +134,7 @@ export class TabManager {
       console.error(`Error classifying tab ${tabId}:`, error);
     } finally {
       this.processingQueue.delete(tabId);
+      this.broadcastStatus();
     }
   }
 
@@ -176,5 +196,36 @@ export class TabManager {
     } catch {
       return false;
     }
+  }
+
+  // Expose processing state for popup queries
+  public isProcessing(): boolean {
+    return (this.processingQueue.size + this.pendingQueue.size) > 0;
+  }
+
+  public getProcessingCount(): number {
+    return this.processingQueue.size + this.pendingQueue.size;
+  }
+
+  public getProcessingIds(): number[] {
+    return Array.from(this.processingQueue);
+  }
+
+  public getPendingIds(): number[] {
+    return Array.from(this.pendingQueue);
+  }
+
+  private broadcastStatus() {
+    try {
+      browser.runtime.sendMessage({
+        type: 'PROCESSING_STATUS',
+        payload: {
+          active: this.isProcessing(),
+          count: this.getProcessingCount(),
+          processingIds: this.getProcessingIds(),
+          pendingIds: this.getPendingIds(),
+        }
+      });
+    } catch {}
   }
 }

@@ -38,6 +38,9 @@ class PopupController {
     
     // Get processed count
     this.updateProcessedCount();
+
+    // Setup processing status listeners and fetch initial state
+    this.setupProcessingStatusListeners();
     
     // Display build info
     this.displayBuildInfo();
@@ -260,6 +263,91 @@ class PopupController {
         this.updateProcessedCount();
       }
     });
+  }
+
+  private setupProcessingStatusListeners() {
+    // Listen to processing status push updates
+    browser.runtime.onMessage.addListener((message: any) => {
+      if (message && message.type === 'PROCESSING_STATUS') {
+        const { active, count, processingIds } = message.payload || {};
+        this.updateProcessingStatusUI(!!active, typeof count === 'number' ? count : 0, Array.isArray(processingIds) ? processingIds : []);
+      }
+    });
+
+    // Request initial status
+    browser.runtime
+      .sendMessage({ type: 'GET_PROCESSING_STATUS' })
+      .then((resp: any) => {
+        if (resp) {
+          const { active, count, processingIds } = resp;
+          this.updateProcessingStatusUI(!!active, typeof count === 'number' ? count : 0, Array.isArray(processingIds) ? processingIds : []);
+        }
+      })
+      .catch(() => {
+        // Ignore errors
+      });
+  }
+
+  private async updateProcessingStatusUI(active: boolean, count: number, processingIds: number[] = []) {
+    const processingEl = document.getElementById('processingStatus');
+    const idleEl = document.getElementById('processingIdle');
+    const countEl = document.getElementById('processingCount');
+    const namesEl = document.getElementById('processingNames');
+    if (!processingEl || !idleEl) return;
+
+    if (active) {
+      // Ensure only processing is visible
+      processingEl.style.display = 'flex';
+      idleEl.style.display = 'none';
+      // Hide the old count indicator; we will show "他N件" separately
+      if (countEl) countEl.textContent = '';
+      if (namesEl) {
+        try {
+          // Only show the first processing tab title
+          const currentId = processingIds[0];
+          let currentTitle = '';
+          if (typeof currentId === 'number') {
+            try {
+              const t = await browser.tabs.get(currentId);
+              currentTitle = t.title || t.url || `Tab ${currentId}`;
+            } catch {
+              currentTitle = `Tab ${currentId}`;
+            }
+          }
+          const others = Math.max(0, processingIds.length - 1);
+          const titleEl = document.getElementById('processingTitle');
+          const othersEl = document.getElementById('processingOthers');
+          if (titleEl) titleEl.textContent = currentTitle;
+          if (othersEl) othersEl.textContent = others > 0 ? ` 他${others}件` : '';
+          // Toggle visibility via class
+          if (currentTitle || others > 0) {
+            namesEl.classList.remove('hidden');
+          } else {
+            namesEl.classList.add('hidden');
+          }
+        } catch {
+          const titleEl = document.getElementById('processingTitle');
+          const othersEl = document.getElementById('processingOthers');
+          if (titleEl) titleEl.textContent = '';
+          if (othersEl) othersEl.textContent = '';
+          namesEl.classList.add('hidden');
+        }
+      }
+    } else {
+      // Ensure only idle is visible
+      processingEl.style.display = 'none';
+      idleEl.style.display = '';
+      if (countEl) {
+        countEl.textContent = '';
+      }
+      if (namesEl) {
+        const titleEl = document.getElementById('processingTitle');
+        const othersEl = document.getElementById('processingOthers');
+        if (titleEl) titleEl.textContent = '';
+        if (othersEl) othersEl.textContent = '';
+        namesEl.classList.add('hidden');
+      }
+    }
   }
 
   private async displayLastApiCheckStatus() {
@@ -502,7 +590,7 @@ class PopupController {
       }
 
       this.showNotification(`${ungroupedTabs.length}個のタブの分類を開始しました`);
-      
+
       // Refresh groups after a delay
       setTimeout(() => this.loadGroups(), 3000);
     } catch (error) {

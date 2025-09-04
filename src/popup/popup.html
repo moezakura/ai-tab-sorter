@@ -70,6 +70,21 @@
             </button>
           </div>
         </div>
+        <div class="status-item mb-1 flex-wrap">
+          <span class="status-label">処理状態:</span>
+          <div class="flex items-center gap-2">
+            <div id="processingStatus" class="flex items-center gap-1 text-sm hidden">
+              <i class="i-mdi-loading animate-spin inline-block align-middle leading-none"></i>
+              <span class="status-value status-active">処理中</span>
+              <span id="processingCount" class="text-xs text-text-secondary"></span>
+            </div>
+            <span id="processingIdle" class="status-value">待機中</span>
+          </div>
+          <div id="processingNames" class="text-xs text-text-secondary mt-1 ml-6 w-full flex gap-1 min-w-0 hidden">
+            <span id="processingTitle" class="truncate flex-1 min-w-0"></span>
+            <span id="processingOthers" class="shrink-0"></span>
+          </div>
+        </div>
         <div class="status-item h-8">
           <span class="status-label">処理済みタブ:</span>
           <span id="processedCount" class="status-value">0</span>

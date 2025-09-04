@@ -96,7 +96,8 @@ class BackgroundService {
 
       case 'CLASSIFY_TAB':
         if (message.payload?.tabId) {
-          return this.tabManager.classifyTab(message.payload.tabId);
+          this.tabManager.enqueueTab(message.payload.tabId);
+          return { queued: true };
         }
         break;
 
@@ -112,6 +113,14 @@ class BackgroundService {
       case 'SETTINGS_UPDATED':
         await this.loadSettings();
         return { success: true };
+
+      case 'GET_PROCESSING_STATUS':
+        return {
+          active: this.tabManager.isProcessing(),
+          count: this.tabManager.getProcessingCount(),
+          processingIds: this.tabManager.getProcessingIds(),
+          pendingIds: this.tabManager.getPendingIds(),
+        };
 
       default:
         console.warn('Unknown message type:', message.type);
@@ -129,17 +138,10 @@ class BackgroundService {
     );
 
     console.log(`Found ${normalTabs.length} ungrouped tabs to process`);
-    
-    // Process tabs in batches to avoid overwhelming the API
-    const batchSize = 5;
-    for (let i = 0; i < normalTabs.length; i += batchSize) {
-      const batch = normalTabs.slice(i, i + batchSize);
-      await Promise.all(batch.map(tab => this.tabManager.classifyTab(tab.id!)));
-      
-      // Add delay between batches
-      if (i + batchSize < normalTabs.length) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+
+    // Enqueue all to reflect pending state and allow TabManager to process
+    for (const tab of normalTabs) {
+      if (tab.id) this.tabManager.enqueueTab(tab.id);
     }
   }
 
