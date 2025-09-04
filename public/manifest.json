@@ -2,6 +2,12 @@
   "manifest_version": 3,
   "name": "AI Tab Sorter",
   "version": "1.0.0",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "c38p8d@gmail.com",
+      "strict_min_version": "139.0"
+    }
+  },
   "description": "AIを使用してタブを自動的にグループ化する拡張機能",
   "permissions": [
     "tabs",
@@ -14,7 +20,7 @@
     "<all_urls>"
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://*"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' http: https: ws: wss:; object-src 'none'"
   },
   "background": {
     "scripts": [

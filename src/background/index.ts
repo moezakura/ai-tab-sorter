@@ -116,6 +116,15 @@ class BackgroundService {
         await this.loadSettings();
         return { success: true };
 
+      case 'TEST_CONNECTION':
+        try {
+          const ok = await this.aiClassifier.testConnection();
+          return { success: ok };
+        } catch (e) {
+          console.error('Background TEST_CONNECTION failed:', e);
+          return { success: false };
+        }
+
       case 'GET_PROCESSING_STATUS':
         return {
           active: this.tabManager.isProcessing(),

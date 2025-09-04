@@ -78,7 +78,8 @@ export type MessageType =
   | 'GROUP_TAB'
   | 'SETTINGS_UPDATED'
   | 'PROCESSING_STATUS'
-  | 'GET_PROCESSING_STATUS';
+  | 'GET_PROCESSING_STATUS'
+  | 'TEST_CONNECTION';
 
 export interface Message<T = any> {
   type: MessageType;

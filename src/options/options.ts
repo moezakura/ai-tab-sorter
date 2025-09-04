@@ -3,8 +3,6 @@ import '../styles/themes.css';
 import browser from 'webextension-polyfill';
 import { StorageManager } from '../utils/storage';
 import { ExtensionSettings, DEFAULT_SETTINGS } from '../types';
-import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
-import { generateText } from 'ai';
 import { BUILD_INFO } from '../utils/buildInfo';
 
 class OptionsController {
@@ -403,61 +401,15 @@ class OptionsController {
   }
 
   private async testConnection() {
-    const apiUrl = (document.getElementById('apiUrl') as HTMLInputElement).value;
-    const apiKey = (document.getElementById('apiKey') as HTMLInputElement).value;
-    const model = (document.getElementById('model') as HTMLInputElement).value;
-
-    // APIClientと同じ設定でプロバイダを作成
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    };
-    
-    if (apiKey) {
-      headers['Authorization'] = `Bearer ${apiKey}`;
-    }
-
-    // URLをそのまま保持し、HTTPとHTTPSの両方に対応
-    const baseURL = apiUrl;
-    
-    // デバッグ用：接続テストで使用されるbaseURLをコンソールに出力
-    console.log('Testing connection with:', {
-      baseURL,
-      model,
-      hasApiKey: !!apiKey
-    });
-    
-    // fetchオプションを設定（ローカルLLM用にSSL検証をスキップ）
-    const customFetch: typeof fetch = async (input, init) => {
-      // @ts-ignore - ブラウザ環境ではこのオプションは無視される
-      const options = {
-        ...init,
-        // ローカルHTTPサーバーへの接続を許可
-        rejectUnauthorized: false
-      };
-      return globalThis.fetch(input, options);
-    };
-
-    const provider = createOpenAICompatible({
-      name: 'custom-provider',
-      baseURL,
-      headers,
-      fetch: customFetch
-    });
-
     try {
-      const testMessages = [
-        { role: 'user' as const, content: 'Hello' }
-      ];
-
-      await generateText({
-        model: provider(model),
-        messages: testMessages,
-        maxRetries: 2
-      });
-
-      this.showNotification('接続成功！', 'success');
+      const result = await browser.runtime.sendMessage({ type: 'TEST_CONNECTION' });
+      if (result && result.success) {
+        this.showNotification('接続成功！', 'success');
+      } else {
+        this.showNotification('接続エラー', 'error');
+      }
     } catch (error) {
-      console.error('API connection test failed:', error);
+      console.error('TEST_CONNECTION message failed:', error);
       this.showNotification('接続エラー', 'error');
     }
   }

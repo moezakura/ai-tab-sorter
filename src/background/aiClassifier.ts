@@ -108,6 +108,15 @@ JSONは以下のフォーマットで返してください:
       return null;
     }
   }
+
+  async testConnection(): Promise<boolean> {
+    try {
+      return await this.apiClient.testConnection();
+    } catch (e) {
+      console.error('AIClassifier testConnection failed:', e);
+      return false;
+    }
+  }
 }
 
 class RateLimiter {
