@@ -36,10 +36,10 @@ npm install
 ### 3. ビルド
 
 ```bash
-# Viteを使用したプロダクションビルド
-npm run build
+# Firefox向けビルド（XPI同時生成・推奨）
+npm run build:firefox
 
-# または開発モード（ファイル変更を監視）
+# 開発モード（ファイル変更を監視してdistを更新）
 npm run dev
 ```
 
@@ -87,14 +87,67 @@ ollama pull llama3
 OLLAMA_ORIGINS=moz-extension://* ollama serve
 ```
 
+### 接続方式（HTTPS推奨）
+
+- 推奨: 可能な限りLLMのAPIエンドポイントは `https://` を使用してください。
+  - 例: 逆プロキシやローカル証明書を設定して `https://localhost:11434/v1` などを利用
+- 例外: 検証・開発用途で `http://` を使う場合は、拡張機能のマニフェスト（CSPの `connect-src`）を修正してから使用してください（手順は下記）。
+
 ### 拡張機能の設定
 
 1. 拡張機能のポップアップまたは設定ページを開く
 2. API設定:
-   - エンドポイント: `http://localhost:11434/v1`
+   - エンドポイント（推奨）: `https://<your-llm-host>/v1`
+   - エンドポイント（開発/ローカル）: `http://localhost:11434/v1`（HTTPを使う場合は下記のCSP修正が必要）
    - モデル: `llama3`
    - APIキー: ローカルLLMの場合は不要
 3. カテゴリと除外URLをカスタマイズ
+
+#### HTTPを利用する場合のマニフェスト修正手順（Firefox, Manifest V3）
+
+拡張機能がHTTPのエンドポイントへ接続できるよう、`public/manifest.json` を編集してください。ビルドは `public/manifest.json` を元に `dist/manifest.json` を生成します。
+
+補足: 本プロジェクトの `host_permissions` は `<all_urls>` のため、HTTP利用のために `host_permissions` を変更する必要はありません。CSP（下記）の調整のみ行ってください。
+
+1)（必要に応じて）CSPでHTTP接続を許可
+
+環境によっては拡張ページのCSPで `connect-src` が制限され、HTTP先への接続がブロックされる場合があります。その場合は `content_security_policy.extension_pages` を追加して `connect-src` にHTTPの接続先を含めてください。
+
+重要: `connect-src` では「オリジン（例: `http://192.168.0.0:8080`）」のみを指定します。末尾の `/` や `/*`、パス（`/v1/...`）は書かないでください。
+
+```json
+{
+  "manifest_version": 3,
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://* http://localhost:11434"
+  }
+}
+```
+
+必要なHTTPオリジンをスペース区切りで列挙します。`http://<host>:<port>/*` のようにパス付きで書くと無効になりブロックされます（オリジンのみを指定）。
+
+2) ビルドを再実行し、拡張を再読み込み
+
+```bash
+npm run build:firefox
+```
+
+##### トラブルシュート: CSPエラーが出る場合
+
+現象例:
+
+```
+Content-Security-Policy: The page’s settings blocked the loading of a resource (connect-src) at http://<IP>:<PORT>/v1/... because it violates the following directive: "connect-src 'self' https://* http://<IP>:<PORT>/*"
+```
+
+対処:
+- `content_security_policy.extension_pages` の `connect-src` に、オリジンをパスなしで列挙してください。
+  - 悪い例: `http://192.168.0.0:8080/*`（無効）
+  - 良い例: `http://192.168.0.0:8080`
+- 変更後は `npm run build:firefox` を再実行し、拡張を再読み込みします。
+
+注:
+- `dist/manifest.json` を直接編集しても次回ビルド時に上書きされるため、必ず `public/manifest.json` を修正してください。
 
 ## 🏗️ プロジェクト構造
 
