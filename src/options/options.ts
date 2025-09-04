@@ -135,8 +135,8 @@ class OptionsController {
         const categoryColor = colorMap[cat.color] || 'grey';
         
         return `
-        <div class="flex items-center p-2 bg-surface rounded">
-          <span class="w-5 h-5 rounded mr-2.5" style="background-color: rgb(var(--color-group-${categoryColor}))"></span>
+        <div class="flex items-center py-2 pl-4 pr-0 rounded-md" style="background-color: rgb(var(--color-group-${categoryColor}) / 0.1)">
+          <div class="w-3 h-10 rounded-sm mr-3" style="background-color: rgb(var(--color-group-${categoryColor}))"></div>
           <span class="flex-1 text-text">${cat.name}</span>
           <button class="btn bg-danger text-white border border-danger hover:opacity-90" data-index="${index}" title="削除">
             <i class="i-mdi-trash-can-outline text-lg block text-white"></i>

@@ -132,5 +132,12 @@ export default defineConfig({
     'text-white',
     'hover:opacity-90',
     'btn',
+    // Ensure runtime-generated category row padding/layout classes
+    'flex',
+    'items-center',
+    'rounded-md',
+    'py-2',
+    'pl-4',
+    'pr-0',
   ],
 });
