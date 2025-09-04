@@ -10,28 +10,67 @@ OpenAI互換APIを使用してタブを自動的にグループ化するFirefox�
 - **カスタマイズ可能**: カテゴリ、色、分類ルールを自由に設定
 - **バッチ処理**: 複数のタブを効率的に一括分類
 
+## 📋 前提条件
+
+- **Node.js**: v18以上
+- **npm**: v8以上
+- **Firefox**: Developer Edition推奨（Tab Groups API使用のため）
+
 ## 📦 インストール
 
-### 開発環境のセットアップ
+### 1. リポジトリのクローン
 
 ```bash
-# 依存関係のインストール
-npm install
-
-# 開発ビルド（ファイル監視モード）
-npm run dev
-
-# プロダクションビルド
-npm run build
+# GitHubからクローン
+git clone https://github.com/moezakura/ai-tab-sorter.git
+cd ai-tab-sorter
 ```
 
-### Firefoxへのインストール
+### 2. 依存関係のインストール
 
-1. `npm run build`でビルドを実行
-2. Firefoxで `about:debugging` を開く
-3. 「このFirefox」を選択
-4. 「一時的な拡張機能を読み込む」をクリック
-5. `dist/manifest.json`を選択
+```bash
+# npm packagesのインストール
+npm install
+```
+
+### 3. ビルド
+
+```bash
+# Viteを使用したプロダクションビルド
+npm run build
+
+# または開発モード（ファイル変更を監視）
+npm run dev
+```
+
+### 4. Firefoxへのインストール
+
+#### 方法A: 開発版として一時的にインストール（推奨）
+
+1. Firefoxで `about:debugging` を開く
+2. 左メニューから「このFirefox」を選択
+3. 「一時的な拡張機能を読み込む」ボタンをクリック
+4. プロジェクトの `dist/manifest.json` ファイルを選択
+5. 拡張機能がロードされ、ツールバーにアイコンが表示される
+
+#### 方法B: XPIファイルとして永続的にインストール
+
+```bash
+# Firefox用の完全ビルド（dist生成 + XPIファイル作成）
+npm run build:firefox
+```
+
+生成された `ai-tab-sorter-1.0.0.zip` ファイルをFirefoxにドラッグ＆ドロップでインストール
+
+## 🛠️ 開発コマンド
+
+```bash
+npm run dev             # Vite開発ビルド（ファイル監視モード）
+npm run build           # Viteプロダクションビルド
+npm run type-check      # TypeScript型チェック
+npm run build:firefox   # Firefox用完全ビルド（dist + XPIファイル）
+npm run build:xpi       # XPIファイルのみ生成（distが必要）
+```
 
 ## 🔧 設定
 
@@ -44,8 +83,8 @@ curl -fsSL https://ollama.ai/install.sh | sh
 # モデルのダウンロード
 ollama pull llama3
 
-# CORSを許可してサーバー起動
-OLLAMA_ORIGINS=chrome-extension://* ollama serve
+# CORSを許可してサーバー起動（Firefox拡張機能用）
+OLLAMA_ORIGINS=moz-extension://* ollama serve
 ```
 
 ### 拡張機能の設定
@@ -60,7 +99,7 @@ OLLAMA_ORIGINS=chrome-extension://* ollama serve
 ## 🏗️ プロジェクト構造
 
 ```
-tab-sorting/
+ai-tab-sorter/
 ├── src/
 │   ├── background/     # バックグラウンドサービス
 │   ├── content/        # コンテンツ抽出
