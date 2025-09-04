@@ -76,7 +76,9 @@ export type MessageType =
   | 'CONTENT_EXTRACTED'
   | 'CLASSIFY_TAB'
   | 'GROUP_TAB'
-  | 'SETTINGS_UPDATED';
+  | 'SETTINGS_UPDATED'
+  | 'PROCESSING_STATUS'
+  | 'GET_PROCESSING_STATUS';
 
 export interface Message<T = any> {
   type: MessageType;
@@ -119,6 +121,7 @@ export const DEFAULT_SETTINGS: ExtensionSettings = {
   excludedUrls: [
     'chrome://*',
     'chrome-extension://*',
+    'moz-extension://*',
     'about:*',
     'file://*'
   ],
