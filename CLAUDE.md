@@ -6,6 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 AI Tab Sorter - OpenAI互換APIを使用してFirefoxのタブを自動的にカテゴリごとにグループ化するブラウザ拡張機能。ローカルLLM（Ollama、llama.cpp等）対応。
 
+## 技術スタック
+
+### CSSフレームワーク: UnoCSS
+- **設定ファイル**: `uno.config.ts`
+- **重要**: Tailwindの標準クラス（`bg-green-500`等）は使用できません
+- カスタムカラー定義とショートカットを使用
+- アイコン表示には必ず`block`クラスを追加（`<i class="i-mdi-icon block">`）
+
 ## 開発コマンド
 
 ```bash
@@ -92,6 +100,22 @@ OLLAMA_ORIGINS=moz-extension://* ollama serve
 3. **エラーハンドリング** - try-catchで例外を捕捉し、console.errorでログ出力
 4. **日本語対応** - UIテキストとAIプロンプトは日本語を使用
 5. **メッセージ通信** - 必ず`Message<T>`型を使用して型安全性を保証
+
+### UnoCSS スタイリング注意事項
+
+1. **利用可能なカラークラス** - `uno.config.ts`で定義されたカスタムカラーのみ使用可能
+   - 例: `bg-primary`, `text-secondary`, `border-danger` など
+   - Tailwind標準の`bg-green-500`等は使用不可
+
+2. **ショートカット定義** - `uno.config.ts`の`shortcuts`セクションで定義済みのクラスを優先使用
+   - 例: `btn-primary`, `toggle-slider`, `status-active` など
+
+3. **スタイル優先順位の問題** - ショートカットのスタイルが優先される場合
+   - 解決策: インラインスタイル（`element.style.property`）を使用
+
+4. **アイコン表示** - `<i>`タグには必ず`block`クラスを追加
+   - 正: `<i class="i-mdi-refresh block"></i>`
+   - 誤: `<i class="i-mdi-refresh"></i>`
 
 ## デバッグ方法
 
