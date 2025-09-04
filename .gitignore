@@ -146,3 +146,7 @@ vite.config.ts.timestamp-*
 
 # build data
 ai_tab_sorter-*.zip
+
+# buildInfo
+src/utils/buildInfo.ts
+
