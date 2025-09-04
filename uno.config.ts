@@ -78,6 +78,8 @@ export default defineConfig({
     'btn-primary': 'btn bg-primary text-text-inverse hover:bg-primary-hover',
     'btn-secondary': 'btn bg-surface border border-border hover:bg-surface-secondary color-text',
     'btn-danger': 'btn bg-surface text-danger border border-danger hover:bg-danger hover:text-text-inverse',
+    // Solid danger button (red by default)
+    'btn-danger-solid': 'inline-flex items-center justify-center p-2.5 rounded bg-danger text-text-inverse border border-danger hover:opacity-90 transition-all',
     'btn-icon': 'inline-flex items-center justify-center p-2.5 bg-transparent border border-border rounded hover:bg-surface-secondary transition-all color-text',
     'btn-link': 'bg-transparent text-primary cursor-pointer hover:underline',
     
@@ -122,5 +124,13 @@ export default defineConfig({
     'i-mdi-brightness-6',
     'i-mdi-weather-sunny',
     'i-mdi-weather-night',
+    // Options page dynamic icon and styles
+    'i-mdi-trash-can-outline',
+    'bg-danger',
+    'border',
+    'border-danger',
+    'text-white',
+    'hover:opacity-90',
+    'btn',
   ],
 });

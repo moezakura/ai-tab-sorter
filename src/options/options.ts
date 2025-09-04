@@ -11,6 +11,8 @@ class OptionsController {
   private storageManager: StorageManager;
   private settings?: ExtensionSettings;
   private currentTheme: 'light' | 'dark' | 'system' = 'system';
+  private selectedCategoryColor: 'blue' | 'red' | 'yellow' | 'green' | 'pink' | 'purple' | 'cyan' | 'grey' | 'orange' = 'grey';
+  private pendingDeleteIndex: number | null = null;
 
   constructor() {
     this.storageManager = new StorageManager();
@@ -133,10 +135,12 @@ class OptionsController {
         const categoryColor = colorMap[cat.color] || 'grey';
         
         return `
-        <div class="flex items-center p-2 bg-surface rounded mb-2">
+        <div class="flex items-center p-2 bg-surface rounded">
           <span class="w-5 h-5 rounded mr-2.5" style="background-color: rgb(var(--color-group-${categoryColor}))"></span>
           <span class="flex-1 text-text">${cat.name}</span>
-          <button class="px-2 py-1 text-xs bg-transparent border border-danger text-danger rounded hover:bg-danger hover:text-text-inverse transition-colors" data-index="${index}">削除</button>
+          <button class="btn bg-danger text-white border border-danger hover:opacity-90" data-index="${index}" title="削除">
+            <i class="i-mdi-trash-can-outline text-lg block text-white"></i>
+          </button>
         </div>
       `;
       }).join('');
@@ -171,7 +175,7 @@ class OptionsController {
         maxTokensValue.textContent = maxTokensInput.value;
       });
     }
-    
+
     // temperatureスライダー
     const temperatureInput = document.getElementById('temperature') as HTMLInputElement;
     const temperatureValue = document.getElementById('temperatureValue');
@@ -180,7 +184,7 @@ class OptionsController {
         temperatureValue.textContent = temperatureInput.value;
       });
     }
-    
+
     // API key visibility toggle
     const toggleApiKeyBtn = document.getElementById('toggleApiKey');
     const apiKeyInput = document.getElementById('apiKey') as HTMLInputElement;
@@ -197,6 +201,62 @@ class OptionsController {
         }
       });
     }
+
+    // カテゴリ追加ボタン -> モーダルを開く
+    document.getElementById('addCategory')?.addEventListener('click', () => this.openCategoryModal());
+
+    // カテゴリ削除（イベントデリゲーション）
+    const categoriesContainer = document.getElementById('categoriesList');
+    categoriesContainer?.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const btn = target.closest('button[data-index]') as HTMLButtonElement | null;
+      if (!btn) return;
+      const index = parseInt(btn.getAttribute('data-index') || '-1', 10);
+      if (Number.isNaN(index) || index < 0) return;
+      this.openDeleteModal(index);
+    });
+
+    // モーダル: 閉じる/キャンセル/保存/オーバーレイ/ESC
+    document.getElementById('categoryClose')?.addEventListener('click', () => this.closeCategoryModal());
+    document.getElementById('categoryCancel')?.addEventListener('click', () => this.closeCategoryModal());
+    document.getElementById('categoryOverlay')?.addEventListener('click', () => this.closeCategoryModal());
+    document.getElementById('categorySave')?.addEventListener('click', () => this.submitCategoryModal());
+    const nameInput = document.getElementById('categoryName') as HTMLInputElement | null;
+    nameInput?.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') {
+        ev.preventDefault();
+        this.submitCategoryModal();
+      }
+      if (ev.key === 'Escape') {
+        ev.preventDefault();
+        this.closeCategoryModal();
+      }
+    });
+    document.addEventListener('keydown', (ev) => {
+      const modal = document.getElementById('categoryModal');
+      const isOpen = modal && !modal.classList.contains('hidden');
+      const deleteModal = document.getElementById('deleteModal');
+      const isDeleteOpen = deleteModal && !deleteModal.classList.contains('hidden');
+      if (!isOpen && !isDeleteOpen) return;
+      if (ev.key === 'Escape') {
+        if (isDeleteOpen) this.closeDeleteModal();
+        else this.closeCategoryModal();
+      }
+    });
+    // 色選択
+    const colorPicker = document.getElementById('colorPicker');
+    colorPicker?.addEventListener('click', (e) => {
+      const target = (e.target as HTMLElement).closest('[data-color]') as HTMLElement | null;
+      if (!target) return;
+      const color = target.getAttribute('data-color') as typeof this.selectedCategoryColor | null;
+      if (!color) return;
+      this.setSelectedColor(color);
+    });
+    // 削除モーダル: 閉じる/キャンセル/確定/オーバーレイ
+    document.getElementById('deleteClose')?.addEventListener('click', () => this.closeDeleteModal());
+    document.getElementById('deleteCancel')?.addEventListener('click', () => this.closeDeleteModal());
+    document.getElementById('deleteOverlay')?.addEventListener('click', () => this.closeDeleteModal());
+    document.getElementById('deleteConfirm')?.addEventListener('click', () => this.confirmDeleteCategory());
   }
 
   private async saveSettings() {
@@ -236,6 +296,101 @@ class OptionsController {
     await browser.runtime.sendMessage({ type: 'SETTINGS_UPDATED' });
     
     this.showNotification('設定を保存しました');
+  }
+
+  private openCategoryModal() {
+    const modal = document.getElementById('categoryModal');
+    const nameInput = document.getElementById('categoryName') as HTMLInputElement | null;
+    if (!modal || !nameInput) return;
+    nameInput.value = '';
+    this.setSelectedColor('grey');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    // フォーカス
+    setTimeout(() => nameInput.focus(), 0);
+  }
+
+  private closeCategoryModal() {
+    const modal = document.getElementById('categoryModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  private setSelectedColor(color: typeof this.selectedCategoryColor) {
+    this.selectedCategoryColor = color;
+    const buttons = document.querySelectorAll('#colorPicker [data-color]');
+    buttons.forEach(btn => {
+      (btn as HTMLElement).classList.remove('ring-primary');
+      (btn as HTMLElement).classList.add('ring-transparent');
+    });
+    const active = document.querySelector(`#colorPicker [data-color="${color}"]`) as HTMLElement | null;
+    if (active) {
+      active.classList.remove('ring-transparent');
+      active.classList.add('ring-primary');
+    }
+  }
+
+  private async submitCategoryModal() {
+    if (!this.settings) return;
+    const nameInput = document.getElementById('categoryName') as HTMLInputElement | null;
+    if (!nameInput) return;
+    const trimmed = (nameInput.value || '').trim();
+    if (!trimmed) {
+      this.showNotification('カテゴリ名を入力してください', 'error');
+      return;
+    }
+    if (this.settings.categories.some(c => c.name === trimmed)) {
+      this.showNotification(`カテゴリ「${trimmed}」は既に存在します`, 'error');
+      return;
+    }
+    const color = this.selectedCategoryColor || 'grey';
+    this.settings.categories.push({ name: trimmed, color });
+    await this.storageManager.saveSettings(this.settings);
+    await browser.runtime.sendMessage({ type: 'SETTINGS_UPDATED' });
+    this.renderCategories();
+    this.closeCategoryModal();
+    this.showNotification(`カテゴリ「${trimmed}」を追加しました`, 'success');
+  }
+
+  private async handleRemoveCategory(index: number) {
+    if (!this.settings) return;
+    const target = this.settings.categories[index];
+    if (!target) return;
+
+    // 削除
+    this.settings.categories.splice(index, 1);
+    await this.storageManager.saveSettings(this.settings);
+    await browser.runtime.sendMessage({ type: 'SETTINGS_UPDATED' });
+    this.renderCategories();
+    this.showNotification(`カテゴリ「${target.name}」を削除しました`, 'success');
+  }
+
+  private openDeleteModal(index: number) {
+    if (!this.settings) return;
+    const modal = document.getElementById('deleteModal');
+    const nameSpan = document.getElementById('deleteCategoryName');
+    if (!modal || !nameSpan) return;
+    this.pendingDeleteIndex = index;
+    nameSpan.textContent = this.settings.categories[index]?.name || '';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  private closeDeleteModal() {
+    const modal = document.getElementById('deleteModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    this.pendingDeleteIndex = null;
+  }
+
+  private async confirmDeleteCategory() {
+    if (this.pendingDeleteIndex === null) return;
+    const index = this.pendingDeleteIndex;
+    this.pendingDeleteIndex = null;
+    await this.handleRemoveCategory(index);
+    this.closeDeleteModal();
   }
 
   private async resetSettings() {

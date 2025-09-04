@@ -91,7 +91,7 @@
           <i class="i-mdi-folder-open text-secondary"></i>
           カテゴリ設定
         </h2>
-        <div id="categoriesList" class="mb-4"></div>
+        <div id="categoriesList" class="mb-4 space-y-3"></div>
         <button id="addCategory" class="btn-secondary flex items-center gap-2">
           <i class="i-mdi-plus"></i>
           カテゴリ追加
@@ -121,6 +121,68 @@
       </div>
     </main>
     
+    <!-- Category Add Modal -->
+    <div id="categoryModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+      <div id="categoryOverlay" class="absolute inset-0 bg-black/40"></div>
+      <div class="relative bg-surface rounded-lg shadow-lg w-[90%] max-w-[480px] p-4 border border-border">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-semibold text-text">カテゴリを追加</h3>
+          <button id="categoryClose" class="p-1.5 rounded hover:bg-surface-secondary text-text-secondary" title="閉じる">
+            <i class="i-mdi-close text-xl block"></i>
+          </button>
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="categoryName" class="form-label">カテゴリ名</label>
+          <input id="categoryName" type="text" class="form-input" placeholder="例: 調査、アイデア、デザインなど" />
+        </div>
+
+        <div class="form-group mb-4">
+          <div class="form-label mb-2">色を選択</div>
+          <div id="colorPicker" class="grid grid-cols-9 gap-2">
+            <button class="w-7 h-7 rounded-full border border-border ring-2 ring-transparent" data-color="blue" style="background-color: rgb(var(--color-group-blue))" title="blue"></button>
+            <button class="w-7 h-7 rounded-full border border-border ring-2 ring-transparent" data-color="red" style="background-color: rgb(var(--color-group-red))" title="red"></button>
+            <button class="w-7 h-7 rounded-full border border-border ring-2 ring-transparent" data-color="yellow" style="background-color: rgb(var(--color-group-yellow))" title="yellow"></button>
+            <button class="w-7 h-7 rounded-full border border-border ring-2 ring-transparent" data-color="green" style="background-color: rgb(var(--color-group-green))" title="green"></button>
+            <button class="w-7 h-7 rounded-full border border-border ring-2 ring-transparent" data-color="pink" style="background-color: rgb(var(--color-group-pink))" title="pink"></button>
+            <button class="w-7 h-7 rounded-full border border-border ring-2 ring-transparent" data-color="purple" style="background-color: rgb(var(--color-group-purple))" title="purple"></button>
+            <button class="w-7 h-7 rounded-full border border-border ring-2 ring-transparent" data-color="cyan" style="background-color: rgb(var(--color-group-cyan))" title="cyan"></button>
+            <button class="w-7 h-7 rounded-full border border-border ring-2 ring-transparent" data-color="grey" style="background-color: rgb(var(--color-group-grey))" title="grey"></button>
+            <button class="w-7 h-7 rounded-full border border-border ring-2 ring-transparent" data-color="orange" style="background-color: rgb(var(--color-group-orange))" title="orange"></button>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button id="categoryCancel" class="btn-secondary">キャンセル</button>
+          <button id="categorySave" class="btn-primary">追加</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirm Modal -->
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+      <div id="deleteOverlay" class="absolute inset-0 bg-black/40"></div>
+      <div class="relative bg-surface rounded-lg shadow-lg w-[90%] max-w-[440px] p-4 border border-border">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-semibold text-text flex items-center gap-2">
+            <i class="i-mdi-alert-circle-outline text-warning"></i>
+            カテゴリを削除
+          </h3>
+          <button id="deleteClose" class="p-1.5 rounded hover:bg-surface-secondary text-text-secondary" title="閉じる">
+            <i class="i-mdi-close text-xl block"></i>
+          </button>
+        </div>
+        <div class="text-text mb-4">
+          <p>カテゴリ「<span id="deleteCategoryName" class="font-medium"></span>」を削除しますか？</p>
+          <p class="text-text-secondary text-sm mt-1">この操作は元に戻せません。</p>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button id="deleteCancel" class="btn-secondary">キャンセル</button>
+          <button id="deleteConfirm" class="btn bg-danger text-white border border-danger hover:opacity-90">削除</button>
+        </div>
+      </div>
+    </div>
+
     <footer class="mt-8 pt-5 border-t border-border">
       <div class="text-center text-xs text-text-secondary flex justify-center gap-2 items-center">
         <span>バージョン: <span id="version" class="font-mono">-</span></span>
