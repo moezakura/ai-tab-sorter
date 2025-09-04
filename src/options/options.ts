@@ -36,53 +36,46 @@ class OptionsController {
 
   private applyTheme() {
     const root = document.documentElement;
-    const themeIcon = document.getElementById('themeIcon');
-    
+    const lightBtn = document.getElementById('lightThemeBtn');
+    const darkBtn = document.getElementById('darkThemeBtn');
+    const systemBtn = document.getElementById('systemThemeBtn');
+
     // Remove existing theme classes
     root.classList.remove('light', 'dark');
     root.removeAttribute('data-theme');
-    
+
+    // Reset button states (match popup style)
+    lightBtn?.classList.remove('bg-white/30', 'bg-yellow-400/30');
+    darkBtn?.classList.remove('bg-white/30', 'bg-blue-600/30');
+    systemBtn?.classList.remove('bg-white/30', 'opacity-100');
+    systemBtn?.classList.add('opacity-60');
+
     if (this.currentTheme === 'light') {
       root.setAttribute('data-theme', 'light');
-      if (themeIcon) {
-        themeIcon.className = 'i-mdi-weather-sunny text-xl';
-      }
+      lightBtn?.classList.add('bg-yellow-400/30');
     } else if (this.currentTheme === 'dark') {
       root.setAttribute('data-theme', 'dark');
       root.classList.add('dark');
-      if (themeIcon) {
-        themeIcon.className = 'i-mdi-weather-night text-xl';
-      }
+      darkBtn?.classList.add('bg-blue-600/30');
     } else {
       // System theme - let CSS media query handle it
-      if (themeIcon) {
-        themeIcon.className = 'i-mdi-brightness-6 text-xl';
-      }
+      systemBtn?.classList.remove('opacity-60');
+      systemBtn?.classList.add('bg-white/30', 'opacity-100');
     }
   }
 
-  private async toggleTheme() {
-    // Cycle through themes: system -> light -> dark -> system
-    if (this.currentTheme === 'system') {
-      this.currentTheme = 'light';
-    } else if (this.currentTheme === 'light') {
-      this.currentTheme = 'dark';
-    } else {
-      this.currentTheme = 'system';
-    }
-    
+  private async setTheme(theme: 'light' | 'dark' | 'system') {
+    this.currentTheme = theme;
     // Save preference
     await browser.storage.local.set({ theme: this.currentTheme });
-    
     // Apply theme
     this.applyTheme();
-    
     // Show notification
     const themeNames = {
       'system': 'システム設定',
       'light': 'ライトテーマ',
       'dark': 'ダークテーマ'
-    };
+    } as const;
     this.showNotification(`テーマ: ${themeNames[this.currentTheme]}`, 'info');
   }
 
@@ -150,9 +143,15 @@ class OptionsController {
   }
 
   private setupEventListeners() {
-    // Theme toggle
-    document.getElementById('themeToggle')?.addEventListener('click', () => {
-      this.toggleTheme();
+    // Theme buttons (align with popup)
+    document.getElementById('lightThemeBtn')?.addEventListener('click', () => {
+      this.setTheme('light');
+    });
+    document.getElementById('darkThemeBtn')?.addEventListener('click', () => {
+      this.setTheme('dark');
+    });
+    document.getElementById('systemThemeBtn')?.addEventListener('click', () => {
+      this.setTheme('system');
     });
     
     // Save button
@@ -321,20 +320,52 @@ class OptionsController {
   }
   
   private showNotification(message: string, type: 'success' | 'error' | 'info' = 'success') {
+    // Create notification element
     const notification = document.createElement('div');
-    
-    // Map notification types to UnoCSS classes
-    const classMap = {
-      'success': 'fixed top-5 right-5 px-5 py-3 rounded-md bg-secondary text-text-inverse text-sm z-1000 animate-slideIn',
-      'error': 'fixed top-5 right-5 px-5 py-3 rounded-md bg-danger text-text-inverse text-sm z-1000 animate-slideIn',
-      'info': 'fixed top-5 right-5 px-5 py-3 rounded-md bg-primary text-text-inverse text-sm z-1000 animate-slideIn'
-    };
-    
-    notification.className = classMap[type];
     notification.textContent = message;
+
+    // Set base styles (align with popup implementation)
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 10000;
+      max-width: 320px;
+      word-wrap: break-word;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease-in-out;
+    `;
+
+    // Type-specific colors
+    const colors = {
+      success: { bg: 'rgb(52, 168, 83)', text: 'white' },
+      error: { bg: 'rgb(234, 67, 53)', text: 'white' },
+      info: { bg: 'rgb(66, 133, 244)', text: 'white' },
+    } as const;
+
+    notification.style.backgroundColor = colors[type].bg;
+    notification.style.color = colors[type].text;
+
     document.body.appendChild(notification);
-    
-    setTimeout(() => notification.remove(), 3000);
+
+    // Enter animation
+    requestAnimationFrame(() => {
+      notification.style.opacity = '1';
+      notification.style.transform = 'translateX(0)';
+    });
+
+    // Auto-remove after 3s with exit animation
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateX(100%)';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
   }
 }
 

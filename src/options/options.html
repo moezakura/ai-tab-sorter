@@ -13,9 +13,17 @@
         AI Tab Sorter 設定
       </h1>
       <div class="flex items-center gap-2">
-        <button id="themeToggle" class="p-2 rounded-full bg-surface border border-border hover:border-primary transition-colors" title="テーマ切り替え">
-          <i id="themeIcon" class="i-mdi-brightness-6 text-xl"></i>
+        <button id="systemThemeBtn" class="p-1.5 rounded bg-surface border border-border text-text hover:bg-surface-secondary transition-all" title="システム設定に従う">
+          <i class="i-mdi-monitor text-lg block"></i>
         </button>
+        <div class="flex items-center rounded-full p-0.5 border border-border bg-surface">
+          <button id="lightThemeBtn" class="theme-btn p-1.5 rounded-full text-text hover:bg-surface-secondary transition-all" title="ライトテーマ">
+            <i class="i-mdi-white-balance-sunny text-lg block"></i>
+          </button>
+          <button id="darkThemeBtn" class="theme-btn p-1.5 rounded-full text-text hover:bg-surface-secondary transition-all" title="ダークテーマ">
+            <i class="i-mdi-weather-night text-lg block"></i>
+          </button>
+        </div>
       </div>
     </header>
 
