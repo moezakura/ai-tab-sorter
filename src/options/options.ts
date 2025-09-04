@@ -11,7 +11,7 @@ class OptionsController {
   private storageManager: StorageManager;
   private settings?: ExtensionSettings;
   private currentTheme: 'light' | 'dark' | 'system' = 'system';
-  private selectedCategoryColor: 'blue' | 'red' | 'yellow' | 'green' | 'pink' | 'purple' | 'cyan' | 'grey' | 'orange' = 'grey';
+  private selectedTabGroupColor: 'blue' | 'red' | 'yellow' | 'green' | 'pink' | 'purple' | 'cyan' | 'grey' | 'orange' = 'grey';
   private pendingDeleteIndex: number | null = null;
 
   constructor() {
@@ -109,12 +109,12 @@ class OptionsController {
     (document.getElementById('excludedUrls') as HTMLTextAreaElement).value = 
       this.settings.excludedUrls.join('\n');
 
-    // カテゴリリスト
-    this.renderCategories();
+    // タブグループリスト
+    this.renderTabGroups();
   }
 
-  private renderCategories() {
-    const container = document.getElementById('categoriesList');
+  private renderTabGroups() {
+    const container = document.getElementById('tabGroupsList');
     if (!container || !this.settings) return;
 
     container.innerHTML = this.settings.categories
@@ -202,12 +202,12 @@ class OptionsController {
       });
     }
 
-    // カテゴリ追加ボタン -> モーダルを開く
-    document.getElementById('addCategory')?.addEventListener('click', () => this.openCategoryModal());
+    // タブグループ追加ボタン -> モーダルを開く
+    document.getElementById('addTabGroup')?.addEventListener('click', () => this.openTabGroupModal());
 
-    // カテゴリ削除（イベントデリゲーション）
-    const categoriesContainer = document.getElementById('categoriesList');
-    categoriesContainer?.addEventListener('click', (e) => {
+    // タブグループ削除（イベントデリゲーション）
+    const tabGroupsContainer = document.getElementById('tabGroupsList');
+    tabGroupsContainer?.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       const btn = target.closest('button[data-index]') as HTMLButtonElement | null;
       if (!btn) return;
@@ -217,30 +217,30 @@ class OptionsController {
     });
 
     // モーダル: 閉じる/キャンセル/保存/オーバーレイ/ESC
-    document.getElementById('categoryClose')?.addEventListener('click', () => this.closeCategoryModal());
-    document.getElementById('categoryCancel')?.addEventListener('click', () => this.closeCategoryModal());
-    document.getElementById('categoryOverlay')?.addEventListener('click', () => this.closeCategoryModal());
-    document.getElementById('categorySave')?.addEventListener('click', () => this.submitCategoryModal());
-    const nameInput = document.getElementById('categoryName') as HTMLInputElement | null;
+    document.getElementById('tabGroupClose')?.addEventListener('click', () => this.closeTabGroupModal());
+    document.getElementById('tabGroupCancel')?.addEventListener('click', () => this.closeTabGroupModal());
+    document.getElementById('tabGroupOverlay')?.addEventListener('click', () => this.closeTabGroupModal());
+    document.getElementById('tabGroupSave')?.addEventListener('click', () => this.submitTabGroupModal());
+    const nameInput = document.getElementById('tabGroupName') as HTMLInputElement | null;
     nameInput?.addEventListener('keydown', (ev) => {
       if (ev.key === 'Enter') {
         ev.preventDefault();
-        this.submitCategoryModal();
+        this.submitTabGroupModal();
       }
       if (ev.key === 'Escape') {
         ev.preventDefault();
-        this.closeCategoryModal();
+        this.closeTabGroupModal();
       }
     });
     document.addEventListener('keydown', (ev) => {
-      const modal = document.getElementById('categoryModal');
+      const modal = document.getElementById('tabGroupModal');
       const isOpen = modal && !modal.classList.contains('hidden');
       const deleteModal = document.getElementById('deleteModal');
       const isDeleteOpen = deleteModal && !deleteModal.classList.contains('hidden');
       if (!isOpen && !isDeleteOpen) return;
       if (ev.key === 'Escape') {
         if (isDeleteOpen) this.closeDeleteModal();
-        else this.closeCategoryModal();
+        else this.closeTabGroupModal();
       }
     });
     // 色選択
@@ -248,7 +248,7 @@ class OptionsController {
     colorPicker?.addEventListener('click', (e) => {
       const target = (e.target as HTMLElement).closest('[data-color]') as HTMLElement | null;
       if (!target) return;
-      const color = target.getAttribute('data-color') as typeof this.selectedCategoryColor | null;
+      const color = target.getAttribute('data-color') as typeof this.selectedTabGroupColor | null;
       if (!color) return;
       this.setSelectedColor(color);
     });
@@ -256,7 +256,7 @@ class OptionsController {
     document.getElementById('deleteClose')?.addEventListener('click', () => this.closeDeleteModal());
     document.getElementById('deleteCancel')?.addEventListener('click', () => this.closeDeleteModal());
     document.getElementById('deleteOverlay')?.addEventListener('click', () => this.closeDeleteModal());
-    document.getElementById('deleteConfirm')?.addEventListener('click', () => this.confirmDeleteCategory());
+    document.getElementById('deleteConfirm')?.addEventListener('click', () => this.confirmDeleteTabGroup());
   }
 
   private async saveSettings() {
@@ -298,9 +298,9 @@ class OptionsController {
     this.showNotification('設定を保存しました');
   }
 
-  private openCategoryModal() {
-    const modal = document.getElementById('categoryModal');
-    const nameInput = document.getElementById('categoryName') as HTMLInputElement | null;
+  private openTabGroupModal() {
+    const modal = document.getElementById('tabGroupModal');
+    const nameInput = document.getElementById('tabGroupName') as HTMLInputElement | null;
     if (!modal || !nameInput) return;
     nameInput.value = '';
     this.setSelectedColor('grey');
@@ -310,15 +310,15 @@ class OptionsController {
     setTimeout(() => nameInput.focus(), 0);
   }
 
-  private closeCategoryModal() {
-    const modal = document.getElementById('categoryModal');
+  private closeTabGroupModal() {
+    const modal = document.getElementById('tabGroupModal');
     if (!modal) return;
     modal.classList.add('hidden');
     modal.classList.remove('flex');
   }
 
-  private setSelectedColor(color: typeof this.selectedCategoryColor) {
-    this.selectedCategoryColor = color;
+  private setSelectedColor(color: typeof this.selectedTabGroupColor) {
+    this.selectedTabGroupColor = color;
     const buttons = document.querySelectorAll('#colorPicker [data-color]');
     buttons.forEach(btn => {
       (btn as HTMLElement).classList.remove('ring-primary');
@@ -331,29 +331,29 @@ class OptionsController {
     }
   }
 
-  private async submitCategoryModal() {
+  private async submitTabGroupModal() {
     if (!this.settings) return;
-    const nameInput = document.getElementById('categoryName') as HTMLInputElement | null;
+    const nameInput = document.getElementById('tabGroupName') as HTMLInputElement | null;
     if (!nameInput) return;
     const trimmed = (nameInput.value || '').trim();
     if (!trimmed) {
-      this.showNotification('カテゴリ名を入力してください', 'error');
+      this.showNotification('タブグループ名を入力してください', 'error');
       return;
     }
     if (this.settings.categories.some(c => c.name === trimmed)) {
-      this.showNotification(`カテゴリ「${trimmed}」は既に存在します`, 'error');
+      this.showNotification(`タブグループ「${trimmed}」は既に存在します`, 'error');
       return;
     }
-    const color = this.selectedCategoryColor || 'grey';
+    const color = this.selectedTabGroupColor || 'grey';
     this.settings.categories.push({ name: trimmed, color });
     await this.storageManager.saveSettings(this.settings);
     await browser.runtime.sendMessage({ type: 'SETTINGS_UPDATED' });
-    this.renderCategories();
-    this.closeCategoryModal();
-    this.showNotification(`カテゴリ「${trimmed}」を追加しました`, 'success');
+    this.renderTabGroups();
+    this.closeTabGroupModal();
+    this.showNotification(`タブグループ「${trimmed}」を追加しました`, 'success');
   }
 
-  private async handleRemoveCategory(index: number) {
+  private async handleRemoveTabGroup(index: number) {
     if (!this.settings) return;
     const target = this.settings.categories[index];
     if (!target) return;
@@ -362,14 +362,14 @@ class OptionsController {
     this.settings.categories.splice(index, 1);
     await this.storageManager.saveSettings(this.settings);
     await browser.runtime.sendMessage({ type: 'SETTINGS_UPDATED' });
-    this.renderCategories();
-    this.showNotification(`カテゴリ「${target.name}」を削除しました`, 'success');
+    this.renderTabGroups();
+    this.showNotification(`タブグループ「${target.name}」を削除しました`, 'success');
   }
 
   private openDeleteModal(index: number) {
     if (!this.settings) return;
     const modal = document.getElementById('deleteModal');
-    const nameSpan = document.getElementById('deleteCategoryName');
+    const nameSpan = document.getElementById('deleteTabGroupName');
     if (!modal || !nameSpan) return;
     this.pendingDeleteIndex = index;
     nameSpan.textContent = this.settings.categories[index]?.name || '';
@@ -385,11 +385,11 @@ class OptionsController {
     this.pendingDeleteIndex = null;
   }
 
-  private async confirmDeleteCategory() {
+  private async confirmDeleteTabGroup() {
     if (this.pendingDeleteIndex === null) return;
     const index = this.pendingDeleteIndex;
     this.pendingDeleteIndex = null;
-    await this.handleRemoveCategory(index);
+    await this.handleRemoveTabGroup(index);
     this.closeDeleteModal();
   }
 

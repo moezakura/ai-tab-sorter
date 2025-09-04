@@ -89,12 +89,12 @@
       <section class="section-card mb-5">
         <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-text">
           <i class="i-mdi-folder-open text-secondary"></i>
-          カテゴリ設定
+          タブグループ設定
         </h2>
-        <div id="categoriesList" class="mb-4"></div>
-        <button id="addCategory" class="btn-secondary flex items-center gap-2">
+        <div id="tabGroupsList" class="mb-4"></div>
+        <button id="addTabGroup" class="btn-secondary flex items-center gap-2">
           <i class="i-mdi-plus"></i>
-          カテゴリ追加
+          タブグループ追加
         </button>
       </section>
 
@@ -121,20 +121,20 @@
       </div>
     </main>
     
-    <!-- Category Add Modal -->
-    <div id="categoryModal" class="fixed inset-0 z-50 hidden items-center justify-center">
-      <div id="categoryOverlay" class="absolute inset-0 bg-black/40"></div>
+    <!-- Tab Group Add Modal -->
+    <div id="tabGroupModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+      <div id="tabGroupOverlay" class="absolute inset-0 bg-black/40"></div>
       <div class="relative bg-surface rounded-lg shadow-lg w-[90%] max-w-[480px] p-4 border border-border">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="text-lg font-semibold text-text">カテゴリを追加</h3>
-          <button id="categoryClose" class="p-1.5 rounded hover:bg-surface-secondary text-text-secondary" title="閉じる">
+          <h3 class="text-lg font-semibold text-text">タブグループを追加</h3>
+          <button id="tabGroupClose" class="p-1.5 rounded hover:bg-surface-secondary text-text-secondary" title="閉じる">
             <i class="i-mdi-close text-xl block"></i>
           </button>
         </div>
 
         <div class="form-group mb-3">
-          <label for="categoryName" class="form-label">カテゴリ名</label>
-          <input id="categoryName" type="text" class="form-input" placeholder="例: 調査、アイデア、デザインなど" />
+          <label for="tabGroupName" class="form-label">タブグループ名</label>
+          <input id="tabGroupName" type="text" class="form-input" placeholder="例: 調査、アイデア、デザインなど" />
         </div>
 
         <div class="form-group mb-4">
@@ -153,8 +153,8 @@
         </div>
 
         <div class="flex justify-end gap-2">
-          <button id="categoryCancel" class="btn-secondary">キャンセル</button>
-          <button id="categorySave" class="btn-primary">追加</button>
+          <button id="tabGroupCancel" class="btn-secondary">キャンセル</button>
+          <button id="tabGroupSave" class="btn-primary">追加</button>
         </div>
       </div>
     </div>
@@ -166,14 +166,14 @@
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-lg font-semibold text-text flex items-center gap-2">
             <i class="i-mdi-alert-circle-outline text-warning"></i>
-            カテゴリを削除
+            タブグループを削除
           </h3>
           <button id="deleteClose" class="p-1.5 rounded hover:bg-surface-secondary text-text-secondary" title="閉じる">
             <i class="i-mdi-close text-xl block"></i>
           </button>
         </div>
         <div class="text-text mb-4">
-          <p>カテゴリ「<span id="deleteCategoryName" class="font-medium"></span>」を削除しますか？</p>
+          <p>タブグループ「<span id="deleteTabGroupName" class="font-medium"></span>」を削除しますか？</p>
           <p class="text-text-secondary text-sm mt-1">この操作は元に戻せません。</p>
         </div>
         <div class="flex justify-end gap-2">

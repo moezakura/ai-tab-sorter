@@ -15,8 +15,8 @@ class BackgroundService {
 
   constructor() {
     this.storageManager = new StorageManager();
-    this.aiClassifier = new AIClassifier(this.settings.apiConfig);
-    this.groupController = new GroupController();
+    this.aiClassifier = new AIClassifier(this.settings.apiConfig, this.settings.categories);
+    this.groupController = new GroupController(this.settings.categories);
     this.tabManager = new TabManager(
       this.aiClassifier,
       this.groupController,
@@ -42,6 +42,8 @@ class BackgroundService {
   private async loadSettings() {
     this.settings = await this.storageManager.getSettings();
     this.aiClassifier.updateConfig(this.settings.apiConfig);
+    this.aiClassifier.updateCategories(this.settings.categories);
+    this.groupController.updateCategories(this.settings.categories);
     this.tabManager.updateSettings(this.settings);
   }
 

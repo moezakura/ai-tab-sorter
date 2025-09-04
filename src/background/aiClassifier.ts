@@ -1,22 +1,27 @@
 import { z } from 'zod';
-import { AIConfig, ClassificationResult, PageContent } from '../types';
-import { DEFAULT_CATEGORIES } from '../types';
+import { AIConfig, ClassificationResult, PageContent, GroupCategory, DEFAULT_CATEGORIES } from '../types';
 import { APIClient } from './apiClient';
 
 export class AIClassifier {
   private config: AIConfig;
   private rateLimiter: RateLimiter;
   private apiClient: APIClient;
+  private categories: GroupCategory[] = DEFAULT_CATEGORIES;
 
-  constructor(config: AIConfig) {
+  constructor(config: AIConfig, categories: GroupCategory[] = DEFAULT_CATEGORIES) {
     this.config = config;
     this.rateLimiter = new RateLimiter(10, 60000); // 10 requests per minute
     this.apiClient = new APIClient(config);
+    this.categories = (categories && categories.length > 0) ? categories : DEFAULT_CATEGORIES;
   }
 
   updateConfig(config: AIConfig) {
     this.config = config;
     this.apiClient.updateConfig(config);
+  }
+
+  updateCategories(categories: GroupCategory[]) {
+    this.categories = (categories && categories.length > 0) ? categories : DEFAULT_CATEGORIES;
   }
 
   async classifyPage(content: PageContent): Promise<ClassificationResult | null> {
@@ -39,7 +44,9 @@ export class AIClassifier {
   }
 
   private buildClassificationPrompt(content: PageContent): string {
-    const categories = DEFAULT_CATEGORIES.map(cat => cat.name).join('\\n');
+    const categories = (this.categories.length > 0 ? this.categories : DEFAULT_CATEGORIES)
+      .map(cat => cat.name)
+      .join('\\n');
     
     return `あなたはウェブページを分類する専門家です。
 以下のページ情報を分析し、最も適切なカテゴリを1つ選んでください。
@@ -67,9 +74,12 @@ JSONは以下のフォーマットで返してください:
   private async callAI(prompt: string): Promise<ClassificationResult | null> {
     try {
       // カテゴリ名の列挙型を動的に作成
-      const categoryEnum = z.enum(
-        DEFAULT_CATEGORIES.map(cat => cat.name) as [string, ...string[]]
-      );
+      const names = (this.categories.length > 0 ? this.categories : DEFAULT_CATEGORIES)
+        .map(cat => cat.name);
+      // Ensure at least one element to satisfy z.enum typing
+      const first = names[0] ?? DEFAULT_CATEGORIES[0].name;
+      const rest = (names.length > 0 ? names.slice(1) : DEFAULT_CATEGORIES.slice(1).map(c => c.name)) as string[];
+      const categoryEnum = z.enum([first, ...rest] as [string, ...string[]]);
 
       const schema = z.object({
         reasoning: z.string().optional().describe('分類の理由'),

@@ -5,9 +5,15 @@ import { isTabGroupsAvailable, getTabGroups, hasTabsGroupMethod, hasTabsUngroupM
 export class GroupController {
   private groupCache: Map<string, number> = new Map(); // category -> groupId
   private tabGroups: Map<number, TabGroupInfo> = new Map(); // groupId -> TabGroupInfo
+  private categories: GroupCategory[] = DEFAULT_CATEGORIES;
 
-  constructor() {
+  constructor(categories: GroupCategory[] = DEFAULT_CATEGORIES) {
+    this.categories = (categories && categories.length > 0) ? categories : DEFAULT_CATEGORIES;
     this.initializeGroups();
+  }
+
+  updateCategories(categories: GroupCategory[]) {
+    this.categories = (categories && categories.length > 0) ? categories : DEFAULT_CATEGORIES;
   }
 
   private async initializeGroups() {
@@ -127,8 +133,9 @@ export class GroupController {
       }
 
       // Create new group
-      const category = DEFAULT_CATEGORIES.find(cat => cat.name === categoryName) 
-        || DEFAULT_CATEGORIES[DEFAULT_CATEGORIES.length - 1]; // Default to 'その他'
+      const list = (this.categories.length > 0 ? this.categories : DEFAULT_CATEGORIES);
+      const category = list.find(cat => cat.name === categoryName)
+        || list[list.length - 1]; // Default to last (e.g., 'その他')
 
       // Create a dummy tab first (Firefox requires at least one tab to create a group)
       const dummyTab = await browser.tabs.create({
