@@ -2,6 +2,7 @@ import browser from 'webextension-polyfill';
 import { AIClassifier } from './aiClassifier';
 import { GroupController } from './groupController';
 import { TabInfo, ExtensionSettings, PageContent, TabCache } from '../types';
+import { StorageManager } from '../utils/storage';
 
 export class TabManager {
   private aiClassifier: AIClassifier;
@@ -9,6 +10,7 @@ export class TabManager {
   private settings: ExtensionSettings;
   private tabCache: TabCache = {};
   private processingQueue: Set<number> = new Set();
+  private storageManager = new StorageManager();
 
   constructor(
     aiClassifier: AIClassifier,
@@ -99,6 +101,9 @@ export class TabManager {
       // Add to appropriate group
       await this.groupController.addTabToGroup(tabId, classification.category);
 
+      // Increment cumulative processed count
+      await this.storageManager.incrementProcessedTotalCount(1);
+
       // Update cache
       this.tabCache[tabId] = {
         ...this.tabCache[tabId],
@@ -120,6 +125,8 @@ export class TabManager {
       const classification = await this.aiClassifier.classifyPage(content);
       if (classification) {
         await this.groupController.addTabToGroup(tabId, classification.category);
+        // Increment cumulative processed count
+        await this.storageManager.incrementProcessedTotalCount(1);
       }
     } catch (error) {
       console.error(`Error processing content for tab ${tabId}:`, error);

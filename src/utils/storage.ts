@@ -5,6 +5,7 @@ export class StorageManager {
   private readonly SETTINGS_KEY = 'extensionSettings';
   private readonly CACHE_KEY = 'tabCache';
   private readonly API_STATUS_KEY = 'apiConnectionStatus';
+  private readonly PROCESSED_TOTAL_KEY = 'processedTotalCount';
 
   async getSettings(): Promise<ExtensionSettings> {
     try {
@@ -161,6 +162,30 @@ export class StorageManager {
       });
     } catch (error) {
       console.error('Error saving API connection status:', error);
+    }
+  }
+
+  // Cumulative processed tabs counter
+  async getProcessedTotalCount(): Promise<number> {
+    try {
+      const result = await browser.storage.local.get(this.PROCESSED_TOTAL_KEY);
+      const val = result[this.PROCESSED_TOTAL_KEY];
+      return typeof val === 'number' && Number.isFinite(val) ? val : 0;
+    } catch (error) {
+      console.error('Error loading processed total count:', error);
+      return 0;
+    }
+  }
+
+  async incrementProcessedTotalCount(delta: number = 1): Promise<void> {
+    try {
+      const current = await this.getProcessedTotalCount();
+      const next = Math.max(0, current + delta);
+      await browser.storage.local.set({
+        [this.PROCESSED_TOTAL_KEY]: next,
+      });
+    } catch (error) {
+      console.error('Error incrementing processed total count:', error);
     }
   }
 }

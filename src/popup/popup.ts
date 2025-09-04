@@ -118,7 +118,23 @@ class PopupController {
         }
       }
     }
-    if (autoGroupCheckbox) autoGroupCheckbox.checked = this.settings.autoGroupNewTabs;
+    if (autoGroupCheckbox) {
+      autoGroupCheckbox.checked = this.settings.autoGroupNewTabs;
+      const autoSlider = autoGroupCheckbox.nextElementSibling as HTMLElement | null;
+      const autoThumb = autoSlider?.querySelector('.toggle-slider-thumb') as HTMLElement | null;
+      if (autoThumb) {
+        if (this.settings.autoGroupNewTabs) {
+          autoThumb.classList.add('translate-x-6');
+        } else {
+          autoThumb.classList.remove('translate-x-6');
+        }
+      }
+      if (autoSlider) {
+        autoSlider.style.backgroundColor = this.settings.autoGroupNewTabs
+          ? 'rgb(52, 168, 83)'
+          : 'rgb(158, 158, 158)';
+      }
+    }
     if (groupingDelayInput) groupingDelayInput.value = (this.settings.groupingDelay / 1000).toString();
 
     // Update status display and toggle button appearance
@@ -185,8 +201,28 @@ class PopupController {
 
     // Auto group toggle
     document.getElementById('autoGroup')?.addEventListener('change', async (e) => {
-      const autoGroup = (e.target as HTMLInputElement).checked;
+      const input = e.target as HTMLInputElement;
+      const autoGroup = input.checked;
       await this.storageManager.updateSetting('autoGroupNewTabs', autoGroup);
+
+      // Update toggle visuals immediately
+      const autoSlider = input.nextElementSibling as HTMLElement | null;
+      const autoThumb = autoSlider?.querySelector('.toggle-slider-thumb') as HTMLElement | null;
+      if (autoThumb) {
+        if (autoGroup) {
+          autoThumb.classList.add('translate-x-6');
+        } else {
+          autoThumb.classList.remove('translate-x-6');
+        }
+      }
+      if (autoSlider) {
+        autoSlider.style.backgroundColor = autoGroup
+          ? 'rgb(52, 168, 83)'
+          : 'rgb(158, 158, 158)';
+      }
+
+      // Notify background script to refresh settings
+      await browser.runtime.sendMessage({ type: 'SETTINGS_UPDATED' });
     });
 
     // Grouping delay
@@ -217,6 +253,13 @@ class PopupController {
     document.getElementById('checkApiStatus')?.addEventListener('click', () => {
       this.checkAPIStatus();
     });
+
+    // Listen for storage changes to update processed count live
+    browser.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && (changes as any)['processedTotalCount']) {
+        this.updateProcessedCount();
+      }
+    });
   }
 
   private async displayLastApiCheckStatus() {
@@ -228,8 +271,8 @@ class PopupController {
     
     if (apiStatus.lastCheckTime && apiStatus.lastStatus !== undefined) {
       statusElement.innerHTML = apiStatus.lastStatus 
-        ? '<i class="i-mdi-check-circle"></i> 接続済み' 
-        : '<i class="i-mdi-alert-circle"></i> 接続エラー';
+        ? '<i class="i-mdi-check-circle inline-block align-middle leading-none"></i> 接続済み' 
+        : '<i class="i-mdi-alert-circle inline-block align-middle leading-none"></i> 接続エラー';
       statusElement.className = apiStatus.lastStatus ? 'status-value status-active' : 'status-value status-error';
       timeElement.textContent = this.formatRelativeTime(apiStatus.lastCheckTime);
     } else {
@@ -248,7 +291,7 @@ class PopupController {
     // Disable button and show loading state
     if (checkButton) {
       checkButton.disabled = true;
-      checkButton.textContent = '⏳';
+      checkButton.innerHTML = '<i class="i-mdi-loading animate-spin text-lg block"></i>';
     }
     statusElement.textContent = '確認中...';
     statusElement.className = 'status-value status-checking';
@@ -262,8 +305,8 @@ class PopupController {
       
       // Update UI
       statusElement.innerHTML = isConnected 
-        ? '<i class="i-mdi-check-circle"></i> 接続済み' 
-        : '<i class="i-mdi-alert-circle"></i> 接続エラー';
+        ? '<i class="i-mdi-check-circle inline-block align-middle leading-none"></i> 接続済み' 
+        : '<i class="i-mdi-alert-circle inline-block align-middle leading-none"></i> 接続エラー';
       statusElement.className = isConnected ? 'status-value status-active' : 'status-value status-error';
       timeElement.textContent = this.formatRelativeTime(Date.now());
       
@@ -276,7 +319,8 @@ class PopupController {
       // Save the status
       await this.storageManager.saveApiConnectionStatus(false);
       
-      statusContainer.innerHTML = '<i class="i-mdi-alert-circle"></i><span class="status-value status-error">接続エラー</span>';
+      statusElement.innerHTML = '<i class="i-mdi-alert-circle inline-block align-middle leading-none"></i> 接続エラー';
+      statusElement.className = 'status-value status-error';
       timeElement.textContent = this.formatRelativeTime(Date.now());
       
       this.showNotification('API接続エラー', 'error');
@@ -343,7 +387,8 @@ class PopupController {
 
   private createGroupElement(group: browser.TabGroups.TabGroup, tabCount: number): HTMLElement {
     const div = document.createElement('div');
-    div.className = 'flex items-center p-2 rounded-md mb-2 last:mb-0';
+    // Compact, marginless item (align with options' categories list)
+    div.className = 'flex items-center py-2 pl-4 pr-2 rounded-md';
     
     // Map Firefox group colors to our CSS variables
     const colorMap: { [key: string]: string } = {
@@ -365,14 +410,14 @@ class PopupController {
     
     div.innerHTML = `
       <div class="w-3 h-10 rounded-sm mr-3" style="background-color: rgb(var(--color-group-${groupColor}))"></div>
-      <div class="flex-1">
-        <div class="font-medium mb-1 text-text">${group.title || '無題のグループ'}</div>
-        <div class="flex gap-3 text-xs text-text-secondary">
+      <div class="flex-1 min-w-0">
+        <div class="font-medium text-sm text-text truncate">${group.title || '無題のグループ'}</div>
+        <div class="flex gap-2 text-xs text-text-secondary">
           <span>${tabCount} タブ</span>
           <span>${group.collapsed ? '折りたたみ' : '展開'}</span>
         </div>
       </div>
-      <button class="px-2 py-1 text-xs text-text bg-transparent border border-border rounded hover:opacity-80 transition-opacity" 
+      <button class="px-2 py-1 text-xs text-text bg-transparent border border-border rounded hover:opacity-80 transition-opacity ml-2 whitespace-nowrap" 
               data-group-id="${group.id}" 
               data-collapsed="${group.collapsed}">
         ${group.collapsed ? '展開' : '折りたたみ'}
@@ -404,9 +449,8 @@ class PopupController {
     if (!countElement) return;
 
     try {
-      const cache = await this.storageManager.getTabCache();
-      const processedCount = Object.keys(cache).length;
-      countElement.textContent = processedCount.toString();
+      const total = await this.storageManager.getProcessedTotalCount();
+      countElement.textContent = total.toString();
     } catch (error) {
       console.error('Error getting processed count:', error);
       countElement.textContent = '0';

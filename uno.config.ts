@@ -81,6 +81,8 @@ export default defineConfig({
     // Solid danger button (red by default)
     'btn-danger-solid': 'inline-flex items-center justify-center p-2.5 rounded bg-danger text-text-inverse border border-danger hover:opacity-90 transition-all',
     'btn-icon': 'inline-flex items-center justify-center p-2.5 bg-transparent border border-border rounded hover:bg-surface-secondary transition-all color-text',
+    // Compact icon button for tight rows
+    'btn-icon-compact': 'inline-flex items-center justify-center h-7 w-7 p-1.5 bg-transparent border border-border rounded hover:bg-surface-secondary transition-all color-text',
     'btn-link': 'bg-transparent text-primary cursor-pointer hover:underline',
     
     // Toggle Switch
@@ -120,6 +122,11 @@ export default defineConfig({
     'i-mdi-check-circle',
     'i-mdi-alert-circle',
     'i-mdi-refresh',
+    'i-mdi-loading',
+    // layout utils used in dynamic HTML
+    'inline-block',
+    'align-middle',
+    'leading-none',
     'i-mdi-folder-open',
     'i-mdi-brightness-6',
     'i-mdi-weather-sunny',
@@ -139,5 +146,7 @@ export default defineConfig({
     'py-2',
     'pl-4',
     'pr-0',
+    // Animations used at runtime
+    'animate-spin',
   ],
 });

@@ -28,55 +28,52 @@
   </header>
 
   <main class="flex-1 p-4 overflow-y-auto">
-    <!-- Extension Control Section -->
-    <section id="extensionControlSection" class="section p-4 mb-4 transition-all duration-300">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <label for="extensionToggle" class="text-base font-medium text-text">
-            拡張機能
+    <!-- Quick Settings moved to top -->
+    <section class="section">
+      <h2 class="text-sm font-semibold text-text uppercase tracking-wider mb-3">クイック設定</h2>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <label for="autoGroup" class="flex-1 text-text">
+            新規タブを自動グループ化
           </label>
-          <span id="extensionStatusText" class="text-sm px-2 py-0.5 rounded-full font-medium">
-            有効
-          </span>
+          <label class="toggle-container">
+            <input type="checkbox" id="autoGroup" class="toggle-input" checked>
+            <span class="toggle-slider">
+              <span class="toggle-slider-thumb" data-checked="translate-x-6"></span>
+            </span>
+          </label>
         </div>
-        <label class="toggle-container">
-          <input type="checkbox" id="extensionToggle" class="toggle-input" checked>
-          <span class="toggle-slider">
-            <span class="toggle-slider-thumb" data-checked="translate-x-6"></span>
-          </span>
-        </label>
+        <div class="flex justify-between items-center">
+          <label for="groupingDelay" class="flex-1 text-text">
+            グループ化の遅延 (秒)
+          </label>
+          <input type="number" id="groupingDelay" 
+                 class="w-15 px-2 py-1 border border-border rounded text-center text-sm bg-surface focus:outline-none focus:border-primary transition-colors"
+                 min="0" max="10" value="2" step="0.5">
+        </div>
       </div>
     </section>
 
     <section class="section">
       <h2 class="text-sm font-semibold text-text uppercase tracking-wider mb-3">ステータス</h2>
-      <div class="bg-surface-secondary rounded-lg p-3">
-        <div class="status-item">
-          <span class="status-label">API接続:</span>
+      <div class="bg-surface-secondary rounded-lg p-2 text-sm">
+        <div class="status-item h-8 mb-1">
+          <span class="status-label">API:</span>
           <div class="flex items-center gap-2">
-            <div id="apiStatus" class="flex items-center gap-1">
+            <div id="apiStatus" class="flex items-center gap-1 text-sm">
               <span id="apiStatusText" class="status-value status-checking">未確認</span>
             </div>
-            <button id="checkApiStatus" class="btn-icon" title="接続をチェック">
-              <i class="i-mdi-refresh text-lg block"></i>
+            <span class="text-xs text-text-secondary">最終:</span>
+            <span id="lastApiCheckTime" class="text-xs">なし</span>
+            <button id="checkApiStatus" class="btn-icon-compact" title="接続をチェック">
+              <i class="i-mdi-refresh text-base block"></i>
             </button>
           </div>
         </div>
-        <div class="status-item pl-5">
-          <span class="text-xs italic text-text-secondary">最終確認:</span>
-          <span id="lastApiCheckTime" class="text-xs">なし</span>
-        </div>
-        <div class="status-item">
+        <div class="status-item h-8">
           <span class="status-label">処理済みタブ:</span>
           <span id="processedCount" class="status-value">0</span>
         </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <h2 class="text-sm font-semibold text-text uppercase tracking-wider mb-3">タブグループ</h2>
-      <div id="groupsList" class="max-h-200px overflow-y-auto">
-        <!-- Groups will be dynamically inserted here -->
       </div>
     </section>
 
@@ -96,24 +93,13 @@
     </section>
 
     <section class="section">
-      <h2 class="text-sm font-semibold text-text uppercase tracking-wider mb-3">クイック設定</h2>
-      <div class="space-y-3">
-        <div class="flex justify-between items-center">
-          <label for="autoGroup" class="flex-1 text-text">
-            新規タブを自動グループ化
-          </label>
-          <input type="checkbox" id="autoGroup" class="w-4.5 h-4.5 cursor-pointer accent-primary" checked>
-        </div>
-        <div class="flex justify-between items-center">
-          <label for="groupingDelay" class="flex-1 text-text">
-            グループ化の遅延 (秒)
-          </label>
-          <input type="number" id="groupingDelay" 
-                 class="w-15 px-2 py-1 border border-border rounded text-center text-sm bg-surface focus:outline-none focus:border-primary transition-colors"
-                 min="0" max="10" value="2" step="0.5">
-        </div>
+      <h2 class="text-sm font-semibold text-text uppercase tracking-wider mb-3">タブグループ</h2>
+      <div id="groupsList" class="max-h-200px overflow-y-auto pr-2">
+        <!-- Groups will be dynamically inserted here -->
       </div>
     </section>
+
+    
   </main>
 
   <footer class="flex justify-between items-center px-4 py-3 border-t border-border bg-surface-secondary">

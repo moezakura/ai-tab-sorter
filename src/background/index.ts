@@ -54,7 +54,11 @@ class BackgroundService {
     });
 
     browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-      if (changeInfo.status === 'complete' && this.settings.enabled) {
+      if (
+        changeInfo.status === 'complete' &&
+        this.settings.enabled &&
+        this.settings.autoGroupNewTabs
+      ) {
         this.tabManager.handleTabUpdate(tab);
       }
     });
@@ -115,7 +119,7 @@ class BackgroundService {
   }
 
   private async initializeExistingTabs() {
-    if (!this.settings.enabled) return;
+    if (!this.settings.enabled || !this.settings.autoGroupNewTabs) return;
 
     const tabs = await browser.tabs.query({});
     const normalTabs = tabs.filter(tab => 
